@@ -1,0 +1,19 @@
+{
+  "title": "Platform Settings & Integrations",
+  "subtitle": "Manage environment connectors, third-party API credentials, and interface language preferences.",
+  "languageSettings": "Language Settings",
+  "interfaceLanguage": "Interface Language",
+  "vietnameseDesc": "Tiếng Việt – Default language, prioritized for Vietnamese SEO workflows",
+  "englishDesc": "English – Secondary international interface",
+  "savedLanguageNotice": "Language preference updated.",
+  "externalConnectors": "External API & Service Connectors",
+  "gscConnector": "Google Search Console API",
+  "gscNotConnected": "Search Console not connected",
+  "serpConnector": "SERP Ranking Provider (SerpApi)",
+  "backlinkConnector": "Backlink Provider Adapter",
+  "pageSpeedConnector": "Google PageSpeed Insights API",
+  "pageSpeedNotConfigured": "PageSpeed data source not configured",
+  "geminiAiConnector": "Gemini 3.8 Flash AI Engine",
+  "environmentSetupGuide": "Environment (.env) Configuration Guide",
+  "allApisOptionalNote": "Notice: All external APIs are OPTIONAL. SEOX AI runs gracefully with zero crash when keys are omitted."
+}

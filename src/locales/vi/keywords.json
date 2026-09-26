@@ -1,0 +1,21 @@
+{
+  "title": "Theo dõi từ khóa & Thứ hạng SERP",
+  "subtitle": "Giám sát vị trí xếp hạng thực tế theo quốc gia, ngôn ngữ, thiết bị và tính năng SERP nâng cao.",
+  "notConnectedTitle": "Chưa kết nối SERP API",
+  "notConnectedDesc": "SEOX AI sử dụng dữ liệu trực tiếp từ nhà cung cấp SERP và tuyệt đối không tạo số liệu thứ hạng mô phỏng.",
+  "connectApi": "Kết nối SERP API",
+  "trackKeyword": "Theo dõi từ khóa mới",
+  "keywordPlaceholder": "Nhập từ khóa cần theo dõi...",
+  "targetDomain": "Tên miền mục tiêu",
+  "country": "Quốc gia",
+  "device": "Thiết bị",
+  "desktop": "Máy tính",
+  "mobile": "Di động",
+  "trackButton": "Kiểm tra vị trí",
+  "tracking": "Đang truy vấn SERP...",
+  "trackedKeywords": "Danh mục từ khóa đang theo dõi",
+  "position": "Thứ hạng",
+  "change": "Thay đổi",
+  "serpFeatures": "Tính năng SERP",
+  "topCompetitorsInSerp": "Đối thủ xuất hiện trong SERP"
+}

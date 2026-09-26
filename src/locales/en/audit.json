@@ -1,0 +1,21 @@
+{
+  "heroH1": "ANALYZE SEO.\nUNDERSTAND YOUR WEBSITE.\nFIX WHAT MATTERS.",
+  "heroSubtitle": "Technical SEO audits, content intelligence, performance, domain analysis and AI-powered recommendations in one platform.",
+  "urlInputPlaceholder": "Enter website URL (e.g., https://example.com)...",
+  "analyzeWebsite": "ANALYZE WEBSITE",
+  "explorePlatform": "EXPLORE PLATFORM",
+  "quickAudit": "Quick Audit",
+  "fullAudit": "Full Site Audit",
+  "pageAnalysis": "Single Page Analysis",
+  "scanning": "Analyzing website...",
+  "analyzing": "Analyzing SEO architecture...",
+  "checkingDns": "Checking DNS...",
+  "checkingHttps": "Checking HTTPS & SSL...",
+  "readingRobots": "Reading robots.txt...",
+  "analyzingSitemap": "Analyzing sitemap...",
+  "crawlingLinks": "Crawling links...",
+  "analyzingContent": "Analyzing content...",
+  "aiGenerating": "AI is generating recommendations...",
+  "auditComplete": "Audit complete",
+  "enterValidUrl": "Please enter a valid website URL (e.g. https://domain.com)"
+}

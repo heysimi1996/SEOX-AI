@@ -1,0 +1,18 @@
+{
+  "title": "Issue Resolution Center",
+  "subtitle": "Technical blockers categorized by severity, impact level, and automated remediation guidance.",
+  "filterAll": "All",
+  "filterCritical": "Critical",
+  "filterHigh": "High",
+  "filterMedium": "Medium",
+  "filterLow": "Low",
+  "filterPassed": "Passed Checks",
+  "generateFix": "Generate AI Code Fix",
+  "category": "Category",
+  "severity": "Severity",
+  "rule": "Rule",
+  "impact": "Search Impact",
+  "howToFix": "How to Fix",
+  "copyCode": "Copy Code",
+  "noIssuesFound": "No issues found in this category."
+}

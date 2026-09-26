@@ -1,0 +1,14 @@
+{
+  "title": "BÁO CÁO KIỂM TRA SEO",
+  "subtitle": "Báo cáo kiểm tra kỹ thuật toàn diện và lộ trình khắc phục chuyên sâu.",
+  "executiveSummary": "Tóm tắt quản trị",
+  "exportPdf": "Xuất báo cáo PDF",
+  "exportCsv": "Xuất dữ liệu CSV",
+  "csvSeverity": "Mức độ",
+  "csvCategory": "Danh mục",
+  "csvUrl": "URL",
+  "csvIssue": "Vấn đề",
+  "csvRecommendation": "Khuyến nghị",
+  "generatedAt": "Thời gian tạo báo cáo: {{date}}",
+  "verifiedBy": "Chứng nhận bởi hệ thống kiểm toán SEOX AI"
+}

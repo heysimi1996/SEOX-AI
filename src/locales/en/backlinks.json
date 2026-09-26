@@ -1,0 +1,17 @@
+{
+  "title": "Backlink Profile & Risk Engine",
+  "subtitle": "Analyze referring domains, anchor distribution, dofollow link equity and potential manipulative footprints.",
+  "notConnectedTitle": "Backlink data source not connected",
+  "notConnectedDesc": "SEOX AI supports DataForSEO, Ahrefs, Semrush, Moz, and Majestic adapters. Without an API key, this module stays in unconfigured mode and will never display synthetic links.",
+  "connectApi": "Connect Backlink API",
+  "totalBacklinks": "Total Backlinks",
+  "referringDomains": "Referring Domains (RD)",
+  "dofollowRatio": "Dofollow / Nofollow Ratio",
+  "velocity": "30-Day Velocity",
+  "avgAuthority": "Avg Domain Authority",
+  "riskAssessment": "Backlink Risk Assessment",
+  "methodologyTitle": "Methodology Standard:",
+  "methodologyNote": "Low domain authority alone does NOT constitute toxic backlink risk. Evaluation analyzes manipulative patterns, unnatural anchor concentrations, sitewide repetition, and sudden spikes.",
+  "potentialRiskIndicators": "Potential Risk Indicators",
+  "noBacklinksFound": "No backlink records available."
+}

@@ -1,0 +1,14 @@
+{
+  "title": "SEO AUDIT REPORT",
+  "subtitle": "Comprehensive technical SEO evaluation, diagnostic findings, and prioritized remediation roadmap.",
+  "executiveSummary": "Executive Summary",
+  "exportPdf": "Export PDF Report",
+  "exportCsv": "Export CSV Data",
+  "csvSeverity": "Severity",
+  "csvCategory": "Category",
+  "csvUrl": "URL",
+  "csvIssue": "Issue",
+  "csvRecommendation": "Recommendation",
+  "generatedAt": "Report Generated: {{date}}",
+  "verifiedBy": "Verified by SEOX AI Audit Platform"
+}

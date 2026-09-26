@@ -1,0 +1,12 @@
+{
+  "title": "Phân tích chuyên sâu tên miền & Hạ tầng",
+  "subtitle": "Kiểm tra bảo mật SSL/TLS, bản ghi DNS, IP máy chủ và cấu hình phản hồi HTTP.",
+  "domainSummary": "Thông tin tên miền",
+  "dnsRecords": "Bản ghi DNS",
+  "sslCertificate": "Chứng chỉ bảo mật SSL",
+  "issuer": "Tổ chức cấp phát",
+  "validFrom": "Hiệu lực từ",
+  "validUntil": "Hết hạn vào",
+  "daysRemaining": "{{days}} ngày còn lại",
+  "securityScore": "Điểm bảo mật hạ tầng"
+}

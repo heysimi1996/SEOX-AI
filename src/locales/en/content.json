@@ -1,0 +1,14 @@
+{
+  "title": "Content Intelligence & Competitor Matrix",
+  "subtitle": "Direct side-by-side technical and semantic benchmarking against market competitors to uncover content gaps.",
+  "competitorMatrix": "Competitor Benchmark Matrix",
+  "contentGap": "Content Gap Analysis",
+  "commonKeywords": "Common Keywords (Direct Head-to-Head)",
+  "keywordOpportunities": "Keyword Opportunities",
+  "addCompetitor": "Add Competitor",
+  "runBenchmark": "Run Benchmark Analysis",
+  "runningBenchmark": "Benchmarking Competitors...",
+  "speedLeader": "Speed Leader",
+  "missingTopic": "Missing Topical Phrase",
+  "remediation": "Recommended Action"
+}

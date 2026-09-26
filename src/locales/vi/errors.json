@@ -1,0 +1,9 @@
+{
+  "generalError": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.",
+  "networkError": "Không thể kết nối tới website mục tiêu.",
+  "timeoutError": "Máy chủ không phản hồi trong thời gian quy định.",
+  "invalidUrl": "Địa chỉ URL không hợp lệ hoặc bị chặn bởi chính sách an toàn mạng.",
+  "unauthorizedGsc": "Google Search Console yêu cầu quyền truy cập OAuth xác thực.",
+  "apiNotConfigured": "Dịch vụ bên ngoài chưa được cấu hình khóa API trong môi trường máy chủ.",
+  "crawlFailed": "Thu thập dữ liệu thất bại đối với tên miền này."
+}

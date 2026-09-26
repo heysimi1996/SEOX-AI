@@ -1,0 +1,21 @@
+{
+  "heroH1": "PHÂN TÍCH SEO.\nHIỂU WEBSITE.\nSỬA ĐÚNG VẤN ĐỀ.",
+  "heroSubtitle": "Phân tích SEO kỹ thuật, nội dung, hiệu suất, tên miền, backlink và đưa ra hướng khắc phục bằng AI trong một nền tảng duy nhất.",
+  "urlInputPlaceholder": "Nhập URL website (ví dụ: https://example.com)...",
+  "analyzeWebsite": "PHÂN TÍCH WEBSITE",
+  "explorePlatform": "KHÁM PHÁ NỀN TẢNG",
+  "quickAudit": "Kiểm tra nhanh",
+  "fullAudit": "Kiểm tra toàn website",
+  "pageAnalysis": "Phân tích trang đơn",
+  "scanning": "Đang phân tích website...",
+  "analyzing": "Đang phân tích cấu trúc SEO...",
+  "checkingDns": "Đang kiểm tra DNS...",
+  "checkingHttps": "Đang kiểm tra HTTPS & SSL...",
+  "readingRobots": "Đang đọc robots.txt...",
+  "analyzingSitemap": "Đang phân tích sitemap...",
+  "crawlingLinks": "Đang quét liên kết...",
+  "analyzingContent": "Đang phân tích nội dung...",
+  "aiGenerating": "AI đang tạo đề xuất...",
+  "auditComplete": "Phân tích hoàn tất",
+  "enterValidUrl": "Vui lòng nhập một địa chỉ URL hợp lệ (ví dụ: https://domain.com)"
+}

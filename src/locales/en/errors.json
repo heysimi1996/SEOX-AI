@@ -1,0 +1,9 @@
+{
+  "generalError": "An unexpected error occurred. Please try again.",
+  "networkError": "Unable to connect to the target website.",
+  "timeoutError": "The server did not respond within the configured timeout.",
+  "invalidUrl": "The provided URL is invalid or blocked by SSRF security policy.",
+  "unauthorizedGsc": "Google Search Console requires verified OAuth authorization.",
+  "apiNotConfigured": "External service API key is not configured in server environment.",
+  "crawlFailed": "Crawling failed for this domain."
+}

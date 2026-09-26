@@ -1,0 +1,19 @@
+{
+  "title": "Cài đặt hệ thống & Kết nối API",
+  "subtitle": "Quản lý khóa môi trường, cổng tích hợp bên thứ ba và cấu hình ngôn ngữ ứng dụng.",
+  "languageSettings": "Cài đặt ngôn ngữ",
+  "interfaceLanguage": "Ngôn ngữ giao diện",
+  "vietnameseDesc": "Tiếng Việt – Ngôn ngữ mặc định, tối ưu thuật ngữ SEO Việt Nam",
+  "englishDesc": "English – Secondary international interface",
+  "savedLanguageNotice": "Đã lưu cài đặt ngôn ngữ.",
+  "externalConnectors": "Cổng kết nối API & Dịch vụ bên ngoài",
+  "gscConnector": "Google Search Console API",
+  "gscNotConnected": "Chưa kết nối Search Console",
+  "serpConnector": "Nhà cung cấp SERP (SerpApi)",
+  "backlinkConnector": "Bộ điều hợp Backlink (Adapter)",
+  "pageSpeedConnector": "Google PageSpeed Insights API",
+  "pageSpeedNotConfigured": "Nguồn dữ liệu PageSpeed chưa được cấu hình",
+  "geminiAiConnector": "Gemini 3.8 Flash AI Engine",
+  "environmentSetupGuide": "Hướng dẫn cấu hình tệp .env",
+  "allApisOptionalNote": "Lưu ý: Tất cả API bên ngoài là TÙY CHỌN. SEOX AI tự động kích hoạt chế độ an toàn khi thiếu khóa mà không làm dừng ứng dụng."
+}

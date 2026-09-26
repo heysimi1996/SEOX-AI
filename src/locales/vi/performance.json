@@ -1,0 +1,13 @@
+{
+  "title": "Hiệu suất tải trang & Core Web Vitals",
+  "subtitle": "Đánh giá thời gian phản hồi máy chủ, tốc độ hiển thị và trải nghiệm người dùng trên thiết bị di động.",
+  "notConfiguredTitle": "Nguồn dữ liệu PageSpeed chưa được cấu hình",
+  "notConfiguredDesc": "Module tiếp tục sử dụng hệ thống đo kiểm trực tiếp (Direct HTTP/TTFB probe) mà không làm gián đoạn dashboard.",
+  "connectPageSpeed": "Cấu hình Google PageSpeed API",
+  "ttfb": "Thời gian nhận byte đầu tiên (TTFB)",
+  "lcp": "Largest Contentful Paint (LCP)",
+  "fid": "First Input Delay (FID)",
+  "cls": "Cumulative Layout Shift (CLS)",
+  "inp": "Interaction to Next Paint (INP)",
+  "mobileOptimization": "Tối ưu hóa thiết bị di động"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "SEOX AI",
+  "description": "AI-Powered SEO Intelligence, Technical Audits, and Domain Analytics Platform",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

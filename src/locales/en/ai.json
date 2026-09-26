@@ -1,0 +1,15 @@
+{
+  "title": "AI SEO Copilot & Actionable Roadmap",
+  "subtitle": "Leverage Gemini models to pinpoint architectural root causes and generate implementation-ready fixes.",
+  "strategicRoadmap": "Strategic Remediation Roadmap",
+  "aiSummary": "AI Strategic Summary",
+  "identifiedFinding": "Finding",
+  "evidence": "Evidence",
+  "whyItMatters": "Why It Matters",
+  "howToFix": "Recommended Fix",
+  "effortEstimate": "Estimated Effort",
+  "expectedBenefit": "Expected Benefit",
+  "generateFixCode": "Generate Fix Code",
+  "generateRoadmap": "Generate New Action Roadmap",
+  "generating": "AI is generating recommendations..."
+}

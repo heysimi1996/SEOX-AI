@@ -1,0 +1,14 @@
+{
+  "title": "Phân tích nội dung & Đối thủ cạnh tranh",
+  "subtitle": "So sánh kiến trúc nội dung trực tiếp với đối thủ, phát hiện khoảng trống chủ đề và cơ hội tối ưu.",
+  "competitorMatrix": "Bảng so sánh đối thủ",
+  "contentGap": "Khoảng trống nội dung (Content Gap)",
+  "commonKeywords": "Từ khóa đối đầu trực tiếp",
+  "keywordOpportunities": "Cơ hội từ khóa tiềm năng",
+  "addCompetitor": "Thêm đối thủ",
+  "runBenchmark": "Chạy phân tích đối thủ",
+  "runningBenchmark": "Đang phân tích đối thủ...",
+  "speedLeader": "Dẫn đầu tốc độ",
+  "missingTopic": "Cụm từ chủ đề còn thiếu",
+  "remediation": "Hành động đề xuất"
+}

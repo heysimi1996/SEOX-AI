@@ -1,0 +1,12 @@
+{
+  "title": "Domain Intelligence & Infrastructure",
+  "subtitle": "Inspect TLS/SSL certificates, DNS records, host IP geolocation and HTTP response posture.",
+  "domainSummary": "Domain Summary",
+  "dnsRecords": "DNS Records",
+  "sslCertificate": "SSL Certificate",
+  "issuer": "Issuer",
+  "validFrom": "Valid From",
+  "validUntil": "Valid Until",
+  "daysRemaining": "{{days}} days remaining",
+  "securityScore": "Infrastructure Security Score"
+}

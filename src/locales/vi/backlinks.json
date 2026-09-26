@@ -1,0 +1,17 @@
+{
+  "title": "Hồ sơ Backlink & Đánh giá rủi ro",
+  "subtitle": "Phân tích miền giới thiệu, anchor text, dòng chảy liên kết dofollow và các dấu hiệu thao túng liên kết.",
+  "notConnectedTitle": "Chưa kết nối nguồn dữ liệu backlink",
+  "notConnectedDesc": "Hệ thống hỗ trợ các adapter DataForSEO, Ahrefs, Semrush, Moz, Majestic. Khi chưa cấu hình API, module hoạt động ở chế độ chờ và không tạo dữ liệu giả.",
+  "connectApi": "Kết nối API Backlink",
+  "totalBacklinks": "Tổng số Backlink",
+  "referringDomains": "Miền giới thiệu (RD)",
+  "dofollowRatio": "Tỷ lệ Dofollow / Nofollow",
+  "velocity": "Tốc độ tăng trưởng 30 ngày",
+  "avgAuthority": "Điểm Authority trung bình",
+  "riskAssessment": "Đánh giá rủi ro liên kết",
+  "methodologyTitle": "Tiêu chuẩn phương pháp:",
+  "methodologyNote": "Điểm uy tín thấp KHÔNG đồng nghĩa với liên kết độc hại (toxic). Báo cáo phân tích chuyên sâu về mật độ anchor thương mại quá mức, lặp sitewide hoặc mạng lưới PBN giả mạo.",
+  "potentialRiskIndicators": "Dấu hiệu rủi ro tiềm ẩn",
+  "noBacklinksFound": "Chưa ghi nhận bản ghi backlink nào."
+}

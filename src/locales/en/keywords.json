@@ -1,0 +1,21 @@
+{
+  "title": "Keyword Tracking & SERP Positions",
+  "subtitle": "Monitor verified organic rank positions across countries, languages, devices, and rich SERP features.",
+  "notConnectedTitle": "SERP API not connected",
+  "notConnectedDesc": "SEOX AI relies strictly on real SERP provider data and refuses to generate simulated ranking positions.",
+  "connectApi": "Connect SERP API",
+  "trackKeyword": "Track New Keyword",
+  "keywordPlaceholder": "Enter query to track...",
+  "targetDomain": "Target Domain",
+  "country": "Country",
+  "device": "Device",
+  "desktop": "Desktop",
+  "mobile": "Mobile",
+  "trackButton": "Check Position",
+  "tracking": "Querying SERP...",
+  "trackedKeywords": "Tracked Keyword Portfolio",
+  "position": "Position",
+  "change": "Change",
+  "serpFeatures": "SERP Features",
+  "topCompetitorsInSerp": "Top Competitors in SERP"
+}

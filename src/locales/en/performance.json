@@ -1,0 +1,13 @@
+{
+  "title": "Performance & Core Web Vitals",
+  "subtitle": "Inspect server response latency, rendering milestones and mobile viewport optimization.",
+  "notConfiguredTitle": "PageSpeed data source not configured",
+  "notConfiguredDesc": "SEOX AI continues to rely on direct HTTP probe diagnostics without interrupting your workflow.",
+  "connectPageSpeed": "Configure Google PageSpeed API",
+  "ttfb": "Time to First Byte (TTFB)",
+  "lcp": "Largest Contentful Paint (LCP)",
+  "fid": "First Input Delay (FID)",
+  "cls": "Cumulative Layout Shift (CLS)",
+  "inp": "Interaction to Next Paint (INP)",
+  "mobileOptimization": "Mobile Optimization"
+}

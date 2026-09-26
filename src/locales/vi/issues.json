@@ -1,0 +1,18 @@
+{
+  "title": "Trung tâm xử lý vấn đề",
+  "subtitle": "Danh sách các rào cản kỹ thuật được phân loại theo mức độ nghiêm trọng và tác động xếp hạng.",
+  "filterAll": "Tất cả",
+  "filterCritical": "Nghiêm trọng",
+  "filterHigh": "Mức độ cao",
+  "filterMedium": "Trung bình",
+  "filterLow": "Thấp",
+  "filterPassed": "Đã đạt chuẩn",
+  "generateFix": "Tạo mã sửa lỗi bằng AI",
+  "category": "Danh mục",
+  "severity": "Mức độ",
+  "rule": "Quy tắc",
+  "impact": "Tác động thứ hạng",
+  "howToFix": "Cách khắc phục",
+  "copyCode": "Sao chép mã",
+  "noIssuesFound": "Không tìm thấy vấn đề nào trong danh mục này."
+}
