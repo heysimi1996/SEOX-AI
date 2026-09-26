@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seox-ai"
+version = "0.1.0"
+description = "AI-assisted SEO analysis toolkit"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "SEOX-AI" }]
+license = { text = "MIT" }
+keywords = ["seo", "ai", "content", "analysis"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools]
+packages = ["seox_ai"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
