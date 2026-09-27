@@ -25,6 +25,7 @@ import {
   Users,
   Bot,
   FileSearch,
+  BarChart3,
 } from 'lucide-react';
 import { PageAuditData, RuleEvaluationResult, OverallHealthScore } from '../../rules/types';
 import { OverviewView } from './views/OverviewView';
@@ -40,6 +41,7 @@ import { AiCopilotView } from './views/AiCopilotView';
 import { ReportsView } from './views/ReportsView';
 import { GscView } from './views/GscView';
 import { RankingsView } from './views/RankingsView';
+import { KeywordVolumeView } from './views/KeywordVolumeView';
 import { BacklinksView } from './views/BacklinksView';
 import { CompetitorsView } from './views/CompetitorsView';
 import { AiSearchSignalsView } from './views/AiSearchSignalsView';
@@ -137,6 +139,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       items: [
         { id: 'gsc', label: t('navigation.gsc'), icon: FileSearch },
         { id: 'rankings', label: t('navigation.keywordTracking'), icon: TrendingUp },
+        { id: 'keyword-volume', label: 'Keyword Volume', icon: BarChart3 },
       ],
     },
     {
@@ -384,6 +387,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
             {currentView === 'rankings' && (
               <RankingsView currentDomain={pageData.url} />
+            )}
+
+            {currentView === 'keyword-volume' && (
+              <KeywordVolumeView />
             )}
 
             {currentView === 'backlinks' && (

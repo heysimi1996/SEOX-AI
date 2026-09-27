@@ -16,6 +16,8 @@ import { activeSerpProvider } from './server/providers/serpProvider.ts';
 import { getActiveBacklinkProvider, backlinkProviders, evaluateBacklinkRisk } from './server/providers/backlinkProvider.ts';
 import { activePageSpeedProvider } from './server/providers/pageSpeedProvider.ts';
 import { activeGscProvider } from './server/providers/gscProvider.ts';
+import { keywordVolumeProviders } from './server/providers/keyword-volume/index.ts';
+import { keywordVolumeRouter } from './server/routes/keywordVolumeRoutes.ts';
 
 dotenv.config();
 
@@ -516,6 +518,7 @@ app.use('/api/gsc', gscRouter);
 // 7. COMPETITOR MATRIX & CONTENT GAP ANALYSIS ROUTES
 // -------------------------------------------------------------
 app.use('/api/competitors', competitorsRouter);
+app.use('/api/keywords', keywordVolumeRouter);
 
 // -------------------------------------------------------------
 // 8. SERP KEYWORD TRACKING API
@@ -629,6 +632,10 @@ app.get('/api/integrations/status', (req, res) => {
       activeProvider: activeBacklink.name,
       availableAdapters: Object.keys(backlinkProviders),
       message: backlinkConfigured ? 'Nguồn backlink đã kết nối' : 'Chưa kết nối nguồn dữ liệu backlink',
+    },
+    keywordVolume: {
+      ahrefs: { configured: keywordVolumeProviders.ahrefs.isConfigured() },
+      dataforseo: { configured: keywordVolumeProviders.dataforseo.isConfigured() },
     },
     pageSpeed: {
       status: pageSpeedConfigured ? 'configured' : 'not_configured',

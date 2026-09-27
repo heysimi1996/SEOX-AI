@@ -18,8 +18,18 @@ import {
   Cpu,
 } from 'lucide-react';
 
+interface IntegrationsStatus {
+  googleSearchConsole?: { hasClientId?: boolean };
+  serpProvider?: { configured?: boolean };
+  backlinkProvider?: { configured?: boolean; activeProvider?: string };
+  keywordVolume?: {
+    ahrefs?: { configured?: boolean };
+    dataforseo?: { configured?: boolean };
+  };
+}
+
 export const SettingsView: React.FC = () => {
-  const [integrationsStatus, setIntegrationsStatus] = useState<any | null>(null);
+  const [integrationsStatus, setIntegrationsStatus] = useState<IntegrationsStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -60,7 +70,7 @@ export const SettingsView: React.FC = () => {
             <div>
               <div className="font-bold text-sm text-white flex items-center gap-2">
                 <span>Google Search Console API</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-neutral-400 border border-white/10">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-neutral-300 border border-white/10">
                   OAuth 2.0 Client
                 </span>
               </div>
@@ -85,7 +95,7 @@ export const SettingsView: React.FC = () => {
             <div>
               <div className="font-bold text-sm text-white flex items-center gap-2">
                 <span>SERP Ranking Provider (SerpApi / DataForSEO)</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-neutral-400 border border-white/10">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-neutral-300 border border-white/10">
                   SERP_API_KEY
                 </span>
               </div>
@@ -102,6 +112,40 @@ export const SettingsView: React.FC = () => {
             >
               <span className={`w-2 h-2 rounded-full ${integrationsStatus?.serpProvider?.configured ? 'bg-emerald-400' : 'bg-amber-400'}`} />
               {integrationsStatus?.serpProvider?.configured ? 'Connected' : 'Not Configured'}
+            </span>
+          </div>
+
+          <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="font-bold text-sm text-white flex items-center gap-2">
+                <span>Keyword Volume — Ahrefs</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-neutral-300 border border-white/10">
+                  AHREFS_API_KEY
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Country-level estimated monthly search volume, requested securely by the server.
+              </p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-mono font-semibold ${integrationsStatus?.keywordVolume?.ahrefs?.configured ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-neutral-800 text-neutral-300'}`}>
+              {integrationsStatus?.keywordVolume?.ahrefs?.configured ? 'Configured' : 'Not configured'}
+            </span>
+          </div>
+
+          <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="font-bold text-sm text-white flex items-center gap-2">
+                <span>Keyword Volume — DataForSEO</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-neutral-300 border border-white/10">
+                  DATAFORSEO_LOGIN / PASSWORD
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Google Ads search volume estimates targeted to each selected country.
+              </p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-mono font-semibold ${integrationsStatus?.keywordVolume?.dataforseo?.configured ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-neutral-800 text-neutral-300'}`}>
+              {integrationsStatus?.keywordVolume?.dataforseo?.configured ? 'Configured' : 'Not configured'}
             </span>
           </div>
 

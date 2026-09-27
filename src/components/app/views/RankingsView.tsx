@@ -29,8 +29,19 @@ interface RankingsViewProps {
   currentDomain?: string;
 }
 
+interface KeywordProject {
+  projectId: string;
+  projectName: string;
+  domain: string;
+  defaultCountry: string;
+  defaultLanguage: string;
+  defaultDevice: 'desktop' | 'mobile';
+}
+
 interface TrackedKeywordItem {
   id: string;
+  projectId: string;
+  domain: string;
   keyword: string;
   country: string;
   language: string;
@@ -42,37 +53,214 @@ interface TrackedKeywordItem {
   lastChecked: string;
 }
 
+interface StoredTrackedKeyword extends Record<string, unknown> {
+  keyword: string;
+}
+
+interface OrganicSerpResult {
+  position: number;
+  title: string;
+  url: string;
+  isTargetDomain: boolean;
+}
+
+interface LatestSerpResult {
+  configured: boolean;
+  keyword: string;
+  country: string;
+  device: string;
+  foundPosition: number | null;
+  foundUrl: string | null;
+  detectedSerpFeatures: string[];
+  organicResults: OrganicSerpResult[];
+  trackedAt: string;
+  error?: string;
+}
+
+function isLatestSerpResult(value: unknown): value is LatestSerpResult {
+  return isRecord(value)
+    && typeof value.configured === 'boolean'
+    && typeof value.keyword === 'string'
+    && typeof value.country === 'string'
+    && typeof value.device === 'string'
+    && (value.foundPosition === null || typeof value.foundPosition === 'number')
+    && (value.foundUrl === null || typeof value.foundUrl === 'string')
+    && Array.isArray(value.detectedSerpFeatures)
+    && value.detectedSerpFeatures.every((feature: unknown) => typeof feature === 'string')
+    && Array.isArray(value.organicResults)
+    && value.organicResults.every((result: unknown) => isRecord(result)
+      && typeof result.position === 'number'
+      && typeof result.title === 'string'
+      && typeof result.url === 'string'
+      && typeof result.isTargetDomain === 'boolean')
+    && typeof value.trackedAt === 'string';
+}
+
+function normalizedDomain(value: string): string {
+  return value.trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isKeywordProject(value: unknown): value is KeywordProject {
+  return isRecord(value)
+    && typeof value.projectId === 'string'
+    && typeof value.projectName === 'string'
+    && typeof value.domain === 'string'
+    && typeof value.defaultCountry === 'string'
+    && typeof value.defaultLanguage === 'string'
+    && (value.defaultDevice === 'desktop' || value.defaultDevice === 'mobile');
+}
+
+function isStoredTrackedKeyword(value: unknown): value is StoredTrackedKeyword {
+  return isRecord(value) && typeof value.keyword === 'string';
+}
+
+function loadProjects(currentDomain: string): KeywordProject[] {
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem('seox_keyword_projects') || '[]');
+    if (Array.isArray(stored)) {
+      const validProjects = stored.filter(isKeywordProject);
+      if (validProjects.length > 0) return validProjects;
+    }
+  } catch {
+    // Invalid local state is replaced with a usable default project.
+  }
+  return [{
+    projectId: 'project_default',
+    projectName: normalizedDomain(currentDomain) || 'SEOX Project',
+    domain: normalizedDomain(currentDomain),
+    defaultCountry: 'us',
+    defaultLanguage: 'en',
+    defaultDevice: 'desktop',
+  }];
+}
+
+function loadTrackedKeywords(currentDomain: string, projects: KeywordProject[]): TrackedKeywordItem[] {
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem('seox_tracked_keywords') || '[]');
+    if (!Array.isArray(stored)) return [];
+    const defaultProject = projects[0];
+    return stored.filter(isStoredTrackedKeyword).map((item) => {
+      const projectId = typeof item.projectId === 'string' && projects.some((project) => project.projectId === item.projectId)
+        ? item.projectId
+        : defaultProject.projectId;
+      const project = projects.find((candidate) => candidate.projectId === projectId) ?? defaultProject;
+      const hadProjectModel = typeof item.projectId === 'string';
+      return {
+        id: typeof item.id === 'string' ? item.id : `kw_${crypto.randomUUID()}`,
+        projectId,
+        domain: typeof item.domain === 'string' ? item.domain : project.domain || normalizedDomain(currentDomain),
+        keyword: item.keyword,
+        country: typeof item.country === 'string' ? item.country : project.defaultCountry,
+        language: typeof item.language === 'string' ? item.language : project.defaultLanguage,
+        device: item.device === 'mobile' ? 'mobile' : 'desktop',
+        position: typeof item.position === 'number' ? item.position : null,
+        previousPosition: hadProjectModel && typeof item.previousPosition === 'number' ? item.previousPosition : null,
+        rankingUrl: typeof item.rankingUrl === 'string' ? item.rankingUrl : null,
+        serpFeatures: Array.isArray(item.serpFeatures) ? item.serpFeatures.filter((feature: unknown): feature is string => typeof feature === 'string') : [],
+        lastChecked: typeof item.lastChecked === 'string' ? item.lastChecked : '',
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'https://yourwebsite.com' }) => {
   const { t, locale } = useI18n();
+  const [projects, setProjects] = useState<KeywordProject[]>(() => loadProjects(currentDomain));
+  const [activeProjectId, setActiveProjectId] = useState(() => {
+    const storedProjects = loadProjects(currentDomain);
+    const savedId = localStorage.getItem('seox_active_keyword_project');
+    return savedId && storedProjects.some((project) => project.projectId === savedId)
+      ? savedId
+      : storedProjects[0].projectId;
+  });
+  const activeProject = projects.find((project) => project.projectId === activeProjectId) ?? projects[0];
   const [keywordInput, setKeywordInput] = useState('');
-  const [country, setCountry] = useState('us');
-  const [language, setLanguage] = useState('en');
-  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [country, setCountry] = useState(() => loadProjects(currentDomain)[0].defaultCountry);
+  const [language, setLanguage] = useState(() => loadProjects(currentDomain)[0].defaultLanguage);
+  const [device, setDevice] = useState<'desktop' | 'mobile'>(() => loadProjects(currentDomain)[0].defaultDevice);
   const [targetDomain, setTargetDomain] = useState(
-    currentDomain.replace(/^https?:\/\//i, '').replace(/\/.*$/, '')
+    normalizedDomain(currentDomain)
   );
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [projectNameInput, setProjectNameInput] = useState('');
+  const [projectDomainInput, setProjectDomainInput] = useState(normalizedDomain(currentDomain));
 
   const [isLoading, setIsLoading] = useState(false);
   const [apiConfigured, setApiConfigured] = useState<boolean | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
 
-  const [trackedKeywords, setTrackedKeywords] = useState<TrackedKeywordItem[]>(() => {
-    const saved = localStorage.getItem('seox_tracked_keywords');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [trackedKeywords, setTrackedKeywords] = useState<TrackedKeywordItem[]>(() =>
+    loadTrackedKeywords(currentDomain, loadProjects(currentDomain))
+  );
+  const projectKeywords = trackedKeywords.filter((item) => item.projectId === activeProjectId);
 
-  const [latestSerpDetails, setLatestSerpDetails] = useState<any | null>(null);
+  const [latestSerpDetails, setLatestSerpDetails] = useState<LatestSerpResult | null>(null);
 
   useEffect(() => {
     // Check integration status
     fetch('/api/integrations/status')
-      .then((res) => res.json())
-      .then((data) => {
-        setApiConfigured(Boolean(data.serpProvider?.configured));
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Could not load SERP provider status.');
+        const data: unknown = await response.json();
+        const provider = isRecord(data) ? data.serpProvider : null;
+        setApiConfigured(isRecord(provider) && typeof provider.configured === 'boolean' ? provider.configured : false);
       })
       .catch(() => setApiConfigured(false));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('seox_keyword_projects', JSON.stringify(projects));
+  }, [projects]);
+
+  useEffect(() => {
+    localStorage.setItem('seox_tracked_keywords', JSON.stringify(trackedKeywords));
+  }, [trackedKeywords]);
+
+  useEffect(() => {
+    localStorage.setItem('seox_active_keyword_project', activeProjectId);
+  }, [activeProjectId]);
+
+  const handleSelectProject = (projectId: string) => {
+    const project = projects.find((item) => item.projectId === projectId);
+    if (!project) return;
+    setActiveProjectId(projectId);
+    setTargetDomain(project.domain);
+    setCountry(project.defaultCountry);
+    setLanguage(project.defaultLanguage);
+    setDevice(project.defaultDevice);
+  };
+
+  const updateProjectDefaults = (updates: Partial<KeywordProject>) => {
+    setProjects((existing) => existing.map((project) =>
+      project.projectId === activeProjectId ? { ...project, ...updates } : project
+    ));
+  };
+
+  const handleCreateProject = (event: React.FormEvent) => {
+    event.preventDefault();
+    const domain = normalizedDomain(projectDomainInput);
+    if (!projectNameInput.trim() || !domain) return;
+    const project: KeywordProject = {
+      projectId: crypto.randomUUID(),
+      projectName: projectNameInput.trim(),
+      domain,
+      defaultCountry: country,
+      defaultLanguage: language,
+      defaultDevice: device,
+    };
+    setProjects((existing) => [...existing, project]);
+    setActiveProjectId(project.projectId);
+    setTargetDomain(domain);
+    setProjectNameInput('');
+    setShowProjectForm(false);
+  };
 
   const handleTrackKeyword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +283,8 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
         }),
       });
 
-      const data = await res.json();
+      const data: unknown = await res.json();
+      if (!isLatestSerpResult(data)) throw new Error('SERP provider returned an invalid response.');
 
       if (!data.configured) {
         setApiConfigured(false);
@@ -107,25 +296,33 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
       setLatestSerpDetails(data);
 
       // Upsert into tracked keywords
+      const previousEntry = trackedKeywords.find((item) =>
+        item.projectId === activeProjectId
+        && item.domain.toLowerCase() === normalizedDomain(targetDomain).toLowerCase()
+        && item.keyword.toLocaleLowerCase() === keywordInput.trim().toLocaleLowerCase()
+        && item.country === country && item.language === language && item.device === device
+      );
       const newEntry: TrackedKeywordItem = {
-        id: `kw_${Date.now()}`,
+        id: previousEntry?.id ?? `kw_${crypto.randomUUID()}`,
+        projectId: activeProjectId,
+        domain: normalizedDomain(targetDomain),
         keyword: keywordInput.trim(),
         country,
         language,
         device,
-        position: data.foundPosition,
-        previousPosition: data.foundPosition ? data.foundPosition + 1 : null,
+        position: typeof data.foundPosition === 'number' ? data.foundPosition : null,
+        previousPosition: previousEntry?.position ?? null,
         rankingUrl: data.foundUrl,
         serpFeatures: data.detectedSerpFeatures || [],
-        lastChecked: new Date().toISOString(),
+        lastChecked: typeof data.trackedAt === 'string' ? data.trackedAt : new Date().toISOString(),
       };
 
-      const updated = [newEntry, ...trackedKeywords.filter((k) => k.keyword !== keywordInput.trim())];
+      const updated = [newEntry, ...trackedKeywords.filter((item) => item.id !== newEntry.id)];
       setTrackedKeywords(updated);
       localStorage.setItem('seox_tracked_keywords', JSON.stringify(updated));
       setKeywordInput('');
-    } catch (err: any) {
-      setApiError(err?.message || 'Failed to query SERP tracker');
+    } catch (error: unknown) {
+      setApiError(error instanceof Error ? error.message : 'Failed to query SERP tracker');
     } finally {
       setIsLoading(false);
     }
@@ -164,10 +361,65 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
               <span className={`w-2 h-2 rounded-full ${apiConfigured ? 'bg-emerald-400' : 'bg-amber-400'}`} />
               {apiConfigured
                 ? (locale === 'vi' ? 'SERP: Đã kết nối (Trực tiếp)' : 'SERP: Connected (Live)')
-                : (locale === 'vi' ? 'Chưa kết nối' : 'Not Connected')}
+                : 'SERP API chưa kết nối'}
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="border border-white/[0.08] bg-[#0D0D0D] rounded-2xl p-5">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+          <div className="flex-1">
+            <label className="block text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5" htmlFor="keyword-project">
+              Project
+            </label>
+            <select
+              id="keyword-project"
+              value={activeProjectId}
+              onChange={(event) => handleSelectProject(event.target.value)}
+              className="w-full bg-[#121212] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FF5E00]"
+            >
+              {projects.map((project) => (
+                <option value={project.projectId} key={project.projectId}>
+                  {project.projectName} — {project.domain}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowProjectForm((visible) => !visible)}
+            className="px-4 py-2.5 rounded-xl border border-white/10 text-neutral-300 hover:text-white hover:border-[#FF5E00]/50 text-sm font-semibold transition-colors"
+          >
+            <Plus className="w-4 h-4 inline mr-1.5" />Create project
+          </button>
+          <div className="text-xs text-neutral-500 sm:pb-2">
+            {activeProject.defaultCountry.toUpperCase()} · {activeProject.defaultLanguage} · {activeProject.defaultDevice}
+          </div>
+        </div>
+        {showProjectForm && (
+          <form onSubmit={handleCreateProject} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 mt-4 pt-4 border-t border-white/[0.08]">
+            <input
+              value={projectNameInput}
+              onChange={(event) => setProjectNameInput(event.target.value)}
+              placeholder="Project name"
+              aria-label="Project name"
+              required
+              className="bg-[#121212] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FF5E00]"
+            />
+            <input
+              value={projectDomainInput}
+              onChange={(event) => setProjectDomainInput(event.target.value)}
+              placeholder="example.com"
+              aria-label="Project domain"
+              required
+              className="bg-[#121212] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-[#FF5E00]"
+            />
+            <button type="submit" className="px-4 py-2.5 rounded-xl bg-[#FF5E00] hover:bg-[#FF6A1A] text-white text-sm font-semibold">
+              Save project
+            </button>
+          </form>
+        )}
       </div>
 
       {/* TRACKING INPUT BAR */}
@@ -197,14 +449,17 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
             </div>
 
             {/* Target Domain */}
-            <div className="md:col-span-3">
+            <div className="md:col-span-2">
               <label className="block text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
                 Target Domain
               </label>
               <input
                 type="text"
                 value={targetDomain}
-                onChange={(e) => setTargetDomain(e.target.value)}
+                onChange={(e) => {
+                  setTargetDomain(e.target.value);
+                  updateProjectDefaults({ domain: normalizedDomain(e.target.value) });
+                }}
                 placeholder="yourwebsite.com"
                 className="w-full bg-[#121212] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-[#FF5E00]"
               />
@@ -217,7 +472,10 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
               </label>
               <select
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  updateProjectDefaults({ defaultCountry: e.target.value });
+                }}
                 className="w-full bg-[#121212] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FF5E00]"
               >
                 <option value="us">United States (US)</option>
@@ -228,6 +486,37 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
                 <option value="au">Australia (AU)</option>
                 <option value="jp">Japan (JP)</option>
                 <option value="br">Brazil (BR)</option>
+                <option value="vn">Vietnam (VN)</option>
+                <option value="th">Thailand (TH)</option>
+                <option value="id">Indonesia (ID)</option>
+                <option value="my">Malaysia (MY)</option>
+                <option value="sg">Singapore (SG)</option>
+                <option value="ph">Philippines (PH)</option>
+                <option value="kh">Cambodia (KH)</option>
+                <option value="la">Laos (LA)</option>
+                <option value="mm">Myanmar (MM)</option>
+                <option value="bn">Brunei (BN)</option>
+                <option value="tl">Timor-Leste (TL)</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-1">
+              <label className="block text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1.5">
+                Language
+              </label>
+              <select
+                value={language}
+                onChange={(e) => {
+                  setLanguage(e.target.value);
+                  updateProjectDefaults({ defaultLanguage: e.target.value });
+                }}
+                className="w-full bg-[#121212] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#FF5E00]"
+              >
+                <option value="en">English (EN)</option>
+                <option value="vi">Vietnamese (VI)</option>
+                <option value="th">Thai (TH)</option>
+                <option value="id">Indonesian (ID)</option>
+                <option value="ms">Malay (MS)</option>
               </select>
             </div>
 
@@ -239,7 +528,10 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
               <div className="bg-[#121212] border border-white/10 rounded-xl p-1 flex">
                 <button
                   type="button"
-                  onClick={() => setDevice('desktop')}
+                  onClick={() => {
+                    setDevice('desktop');
+                    updateProjectDefaults({ defaultDevice: 'desktop' });
+                  }}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                     device === 'desktop' ? 'bg-[#FF5E00] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
@@ -249,7 +541,10 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
                 </button>
                 <button
                   type="button"
-                  onClick={() => setDevice('mobile')}
+                  onClick={() => {
+                    setDevice('mobile');
+                    updateProjectDefaults({ defaultDevice: 'mobile' });
+                  }}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                     device === 'mobile' ? 'bg-[#FF5E00] text-white shadow-sm' : 'text-neutral-400 hover:text-white'
                   }`}
@@ -296,7 +591,7 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
               </div>
               <div className="space-y-2 max-w-2xl">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <span>{locale === 'vi' ? 'Chưa kết nối SERP API' : 'SERP API Not Connected'}</span>
+                  <span>SERP API chưa kết nối</span>
                   <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-amber-500/20 text-amber-400">
                     {locale === 'vi' ? 'Tùy chọn' : 'Optional'}
                   </span>
@@ -357,7 +652,7 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
           <div className="space-y-2">
             <span className="text-xs uppercase font-semibold text-neutral-400">Top Competitors in SERP</span>
             <div className="divide-y divide-white/[0.04] border border-white/[0.08] rounded-xl overflow-hidden bg-[#121212]">
-              {latestSerpDetails.organicResults.slice(0, 5).map((org: any, i: number) => (
+              {latestSerpDetails.organicResults.slice(0, 5).map((org, i) => (
                 <div
                   key={i}
                   className={`p-3 flex items-start justify-between gap-4 text-xs ${
@@ -395,7 +690,7 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
             </p>
           </div>
           <span className="text-xs font-mono text-neutral-400">
-            {trackedKeywords.length} keywords saved
+            {projectKeywords.length} keywords in {activeProject.projectName}
           </span>
         </div>
 
@@ -404,40 +699,42 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
             <thead>
               <tr className="border-b border-white/[0.08] text-neutral-400 uppercase tracking-wider font-sans">
                 <th className="pb-3 font-semibold">Keyword</th>
+                <th className="pb-3 font-semibold">Domain</th>
                 <th className="pb-3 font-semibold">Location / Device</th>
                 <th className="pb-3 font-semibold text-right">Position</th>
+                <th className="pb-3 font-semibold text-right">Previous</th>
                 <th className="pb-3 font-semibold text-right">Change</th>
                 <th className="pb-3 font-semibold">SERP Features</th>
+                <th className="pb-3 font-semibold">Last checked</th>
                 <th className="pb-3 font-semibold text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
-              {trackedKeywords.length === 0 ? (
+              {projectKeywords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-neutral-500 font-sans">
-                    No keywords tracked yet. Enter a query above to start monitoring.
+                  <td colSpan={9} className="py-8 text-center text-neutral-500 font-sans">
+                    No keywords in this project yet. Enter a query above to start monitoring.
                   </td>
                 </tr>
               ) : (
-                trackedKeywords.map((item) => (
+                projectKeywords.map((item) => (
                   <tr key={item.id} className="hover:bg-white/[0.02]">
                     <td className="py-3 font-sans text-white font-medium">
                       <div>{item.keyword}</div>
-                      {item.rankingUrl && (
-                        <div className="text-[11px] text-neutral-500 font-mono truncate max-w-[200px]">
-                          {item.rankingUrl}
-                        </div>
-                      )}
                     </td>
+                    <td className="py-3 font-mono text-neutral-400 max-w-[180px] truncate" title={item.domain}>{item.domain}</td>
                     <td className="py-3 text-neutral-300">
                       {item.country.toUpperCase()} • {item.device}
                     </td>
                     <td className="py-3 text-right">
-                      {item.position ? (
+                      {item.position !== null ? (
                         <span className="font-bold text-[#FF8A3D] text-sm">#{item.position}</span>
                       ) : (
-                        <span className="text-neutral-500">&gt;100</span>
+                        <span className="text-neutral-500">Not found</span>
                       )}
+                    </td>
+                    <td className="py-3 text-right text-neutral-400">
+                      {item.previousPosition === null ? '—' : `#${item.previousPosition}`}
                     </td>
                     <td className="py-3 text-right">
                       {item.previousPosition && item.position ? (
@@ -459,9 +756,14 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
                       )}
                     </td>
                     <td className="py-3 font-sans">
+                      {item.rankingUrl && (
+                        <a href={item.rankingUrl} target="_blank" rel="noreferrer" className="block text-[11px] text-neutral-400 underline decoration-white/20 hover:text-[#FF8A3D] truncate max-w-[220px] mb-1" title={item.rankingUrl}>
+                          {item.rankingUrl}
+                        </a>
+                      )}
                       <div className="flex flex-wrap gap-1">
                         {item.serpFeatures.length === 0 ? (
-                          <span className="text-neutral-500 text-[11px]">Standard Organic</span>
+                          <span className="text-neutral-500 text-[11px]">None detected</span>
                         ) : (
                           item.serpFeatures.slice(0, 2).map((feat, idx) => (
                             <span
@@ -473,6 +775,9 @@ export const RankingsView: React.FC<RankingsViewProps> = ({ currentDomain = 'htt
                           ))
                         )}
                       </div>
+                    </td>
+                    <td className="py-3 text-neutral-400 whitespace-nowrap">
+                      {item.lastChecked ? new Date(item.lastChecked).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US') : '—'}
                     </td>
                     <td className="py-3 text-right">
                       <button
