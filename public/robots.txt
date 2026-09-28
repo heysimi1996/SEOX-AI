@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://seox-ai.site/sitemap.xml

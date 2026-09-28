@@ -13,6 +13,14 @@ Prerequisites: Node.js and npm.
 
 `npm run build` creates the production frontend, and `npm start` runs the Express server serving that build. Set `PORT` to change the server port.
 
+## Free SEO Tools
+
+The public SEO Tools hub is available at `/seo-tools/`. It links to the SEO Checker, Technical SEO Checker, On-Page SEO Checker, Keyword Research, Keyword Volume, Backlink Checker, Redirect 301 Checker, Domain Checker, Website Analyzer, Meta Tag Checker, Schema Checker, and Sitemap Checker. Each route uses the existing SEOX AI React/Vite interface and receives route-specific canonical, Open Graph, title, description, and structured data from Express.
+
+Live URL audits, domain lookups, sitemap checks, redirect checks, and provider-based keyword/backlink data use the existing server-side integrations. Keyword Research requires `GEMINI_API_KEY`; it returns phrase suggestions and intent labels only, not measured search metrics. If an integration is not configured, the corresponding tool reports that it is unavailable rather than filling results with sample data.
+
+The hub and tool routes are included in `public/sitemap.xml`. To verify the route metadata and sitemap entries locally, run `npm test`.
+
 ## Keyword intelligence
 
 ### Project Keywords

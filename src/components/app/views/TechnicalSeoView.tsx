@@ -32,11 +32,11 @@ export const TechnicalSeoView: React.FC<TechnicalSeoViewProps> = ({
     allowRules: string[];
     sitemapsDeclared: string[];
   }>({
-    found: true,
-    content: 'User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /checkout/\n\nSitemap: https://example.com/sitemap.xml',
-    disallowRules: ['/admin/', '/checkout/'],
-    allowRules: ['/'],
-    sitemapsDeclared: ['https://example.com/sitemap.xml'],
+    found: false,
+    content: null,
+    disallowRules: [],
+    allowRules: [],
+    sitemapsDeclared: [],
   });
 
   const [sitemapData, setSitemapData] = useState<{
@@ -44,9 +44,9 @@ export const TechnicalSeoView: React.FC<TechnicalSeoViewProps> = ({
     urlsCount: number;
     hasIndex: boolean;
   }>({
-    found: true,
-    urlsCount: 1420,
-    hasIndex: true,
+    found: false,
+    urlsCount: 0,
+    hasIndex: false,
   });
 
   const [loadingInspection, setLoadingInspection] = useState(false);
@@ -57,12 +57,19 @@ export const TechnicalSeoView: React.FC<TechnicalSeoViewProps> = ({
       const parsed = new URL(pageData.url);
       setLoadingInspection(true);
       fetch(`/api/audit/robots-sitemap?domain=${parsed.hostname}`)
-        .then((r) => r.json())
+        .then((r) => {
+          if (!r.ok) throw new Error(`Inspection returned HTTP ${r.status}`);
+          return r.json();
+        })
         .then((data) => {
           if (data.robotsTxt) setRobotsData(data.robotsTxt);
           if (data.sitemap) setSitemapData(data.sitemap);
         })
-        .catch(() => {})
+        .catch((error: unknown) => {
+          console.error('Robots and sitemap inspection failed:', error);
+          setRobotsData({ found: false, content: null, disallowRules: [], allowRules: [], sitemapsDeclared: [] });
+          setSitemapData({ found: false, urlsCount: 0, hasIndex: false });
+        })
         .finally(() => setLoadingInspection(false));
     } catch {
       // ignore

@@ -281,7 +281,7 @@ export async function auditSingleUrl(targetUrl: string): Promise<PageAuditData> 
     const res = await fetch(finalUrl, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'SEOX-AI-Crawler/1.0 (+https://seox.ai/bot; diagnostic audit engine)',
+        'User-Agent': 'SEOX-AI-Crawler/1.0 (+https://seox-ai.site/; diagnostic audit engine)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
       },

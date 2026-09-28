@@ -16,8 +16,6 @@ import {
   CheckCircle2,
   Layers,
   BarChart3,
-  TrendingUp,
-  TrendingDown,
   Globe,
   SlidersHorizontal,
   ChevronDown,
@@ -40,6 +38,7 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
   const [selectedProvider, setSelectedProvider] = useState<'none' | 'dataforseo' | 'ahrefs' | 'semrush' | 'moz' | 'majestic'>('none');
   const [isLoading, setIsLoading] = useState(false);
   const [isConfigured, setIsConfigured] = useState<boolean>(false);
+  const [providerName, setProviderName] = useState<string | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
 
   const [metrics, setMetrics] = useState<BacklinkMetrics | null>(null);
@@ -49,20 +48,20 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
   // Filters
   const [followFilter, setFollowFilter] = useState<'all' | 'dofollow' | 'nofollow'>('all');
   const [searchAnchor, setSearchAnchor] = useState('');
-  const [minAuthority, setMinAuthority] = useState<number>(0);
 
   const availableProviders = [
     { id: 'none', name: locale === 'vi' ? 'Chưa chọn nhà cung cấp' : 'None (Unconfigured)' },
     { id: 'dataforseo', name: 'DataForSEO (Default)' },
-    { id: 'ahrefs', name: 'Ahrefs API' },
-    { id: 'semrush', name: 'Semrush API' },
-    { id: 'moz', name: 'Moz Link Explorer' },
-    { id: 'majestic', name: 'Majestic SEO' },
+    { id: 'ahrefs', name: 'Ahrefs API (unavailable)' },
+    { id: 'semrush', name: 'Semrush API (unavailable)' },
+    { id: 'moz', name: 'Moz Link Explorer (unavailable)' },
+    { id: 'majestic', name: 'Majestic SEO (unavailable)' },
   ];
 
   const fetchBacklinkData = async (targetDom: string, provider: string) => {
     if (provider === 'none') {
       setIsConfigured(false);
+      setProviderName(null);
       setMetrics(null);
       setBacklinks([]);
       setRiskAssessment(null);
@@ -72,14 +71,20 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
     setIsLoading(true);
     try {
       const res = await fetch(`/api/backlinks/overview?domain=${encodeURIComponent(targetDom)}&provider=${provider}`);
+      if (!res.ok) throw new Error(`Backlink provider returned HTTP ${res.status}.`);
       const data = await res.json();
 
       setIsConfigured(Boolean(data.configured && data.status === 'configured'));
+      setProviderName(typeof data.provider === 'string' ? data.provider : null);
       setMetrics(data.metrics || null);
       setBacklinks(data.backlinks || []);
       setRiskAssessment(data.riskAssessment || null);
     } catch {
       setIsConfigured(false);
+      setProviderName(null);
+      setMetrics(null);
+      setBacklinks([]);
+      setRiskAssessment(null);
     } finally {
       setIsLoading(false);
     }
@@ -91,9 +96,9 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
 
   // Filtered backlink rows
   const filteredBacklinks = backlinks.filter((b) => {
+    if (followFilter !== 'all' && b.isFollow === null) return false;
     if (followFilter === 'dofollow' && !b.isFollow) return false;
     if (followFilter === 'nofollow' && b.isFollow) return false;
-    if (b.domainAuthority < minAuthority) return false;
     if (searchAnchor && !b.anchor.toLowerCase().includes(searchAnchor.toLowerCase())) return false;
     return true;
   });
@@ -170,9 +175,10 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
                 </h3>
                 <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed">
                   {locale === 'vi'
-                    ? 'SEOX AI không tự sinh backlink giả. Để hiển thị số liệu miền giới thiệu và anchor text thực tế từ DataForSEO hoặc Ahrefs/Semrush, hãy kết nối API.'
-                    : 'SEOX AI strictly avoids generating fake or simulated backlink records. Connect your live backlink data source (DataForSEO, Ahrefs, Semrush, etc.) to view real link equity.'}
+                    ? 'SEOX AI không tự sinh backlink giả. Hiện chỉ DataForSEO được tích hợp để cung cấp dữ liệu backlink trực tiếp.'
+                    : 'SEOX AI does not generate simulated backlink records. DataForSEO is currently the only integrated live backlink provider.'}
                 </p>
+                <p className="mt-2 text-xs font-semibold text-amber-200">Backlink data unavailable - configure a supported provider.</p>
               </div>
             </div>
 
@@ -187,17 +193,19 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
         </div>
       )}
 
+      {isConfigured && metrics && <p className="text-xs text-neutral-400">Data source: {providerName ?? selectedProvider}. Counts below describe records returned by this provider.</p>}
+
       {/* METRIC GAUGES */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {isConfigured && metrics && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="border border-white/[0.08] bg-[#0D0D0D] rounded-2xl p-5">
           <span className="text-xs uppercase font-medium text-neutral-400">
-            {locale === 'vi' ? 'Tổng số Backlink' : 'Total Backlinks'}
+            {locale === 'vi' ? 'Bản ghi backlink trả về' : 'Backlink records returned'}
           </span>
           <div className="text-3xl font-extrabold text-white mt-2 font-mono">
-            {isConfigured ? metrics?.totalBacklinks.toLocaleString() || '0' : '—'}
+            {metrics.totalBacklinks.toLocaleString()}
           </div>
           <div className="text-xs text-neutral-500 mt-2">
-            {isConfigured ? (locale === 'vi' ? 'URL đang trỏ tới' : 'Verified pointing URLs') : (locale === 'vi' ? 'Chưa kết nối API' : 'Requires API')}
+            {locale === 'vi' ? 'Số bản ghi trong phản hồi API' : 'Records in the provider response'}
           </div>
         </div>
 
@@ -206,10 +214,10 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
             {locale === 'vi' ? 'Miền giới thiệu' : 'Referring Domains'}
           </span>
           <div className="text-3xl font-extrabold text-white mt-2 font-mono">
-            {isConfigured ? metrics?.referringDomains.toLocaleString() || '0' : '—'}
+            {metrics.referringDomains.toLocaleString()}
           </div>
           <div className="text-xs text-neutral-500 mt-2">
-            {isConfigured ? (locale === 'vi' ? 'Tên miền gốc duy nhất' : 'Unique root domains') : (locale === 'vi' ? 'Chưa kết nối API' : 'Requires API')}
+            {locale === 'vi' ? 'Tên miền duy nhất trong bản ghi trả về' : 'Unique domains among returned records'}
           </div>
         </div>
 
@@ -218,44 +226,15 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
             {locale === 'vi' ? 'Tỷ lệ Dofollow' : 'Dofollow vs Nofollow'}
           </span>
           <div className="text-3xl font-extrabold text-[#FF8A3D] mt-2 font-mono">
-            {isConfigured ? `${metrics?.dofollowPercentage || 0}%` : '—'}
+            {metrics.dofollowPercentage === null ? 'Not reported' : `${metrics.dofollowPercentage.toLocaleString()}%`}
           </div>
           <div className="text-xs text-neutral-500 mt-2">
-            {isConfigured ? `${metrics?.dofollowCount || 0} dofollow / ${metrics?.nofollowCount || 0} nofollow` : (locale === 'vi' ? 'Chưa kết nối API' : 'Requires API')}
+            {metrics.dofollowCount === null || metrics.nofollowCount === null
+              ? 'Follow attributes unavailable'
+              : `${metrics.dofollowCount} dofollow / ${metrics.nofollowCount} nofollow among reported attributes`}
           </div>
         </div>
-
-        <div className="border border-white/[0.08] bg-[#0D0D0D] rounded-2xl p-5">
-          <span className="text-xs uppercase font-medium text-neutral-400">
-            {locale === 'vi' ? 'Tốc độ 30 ngày' : '30-Day Velocity'}
-          </span>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xl font-bold font-mono text-emerald-400 flex items-center">
-              {isConfigured ? `+${metrics?.newLast30Days || 0}` : '—'}
-            </span>
-            <span className="text-neutral-500 font-mono">/</span>
-            <span className="text-xl font-bold font-mono text-rose-400 flex items-center">
-              {isConfigured ? `-${metrics?.lostLast30Days || 0}` : '—'}
-            </span>
-          </div>
-          <div className="text-xs text-neutral-500 mt-2">
-            {locale === 'vi' ? 'Mới vs mất đi' : 'New vs lost velocity'}
-          </div>
-        </div>
-
-        <div className="border border-white/[0.08] bg-[#0D0D0D] rounded-2xl p-5">
-          <span className="text-xs uppercase font-medium text-neutral-400">
-            {locale === 'vi' ? 'Uy tín miền TB (DA)' : 'Avg Domain Authority'}
-          </span>
-          <div className="text-3xl font-extrabold text-white mt-2 font-mono">
-            {isConfigured ? metrics?.averageAuthority || 0 : '—'}
-            {isConfigured && <span className="text-neutral-500 text-sm font-normal">/100</span>}
-          </div>
-          <div className="text-xs text-neutral-500 mt-2">
-            {isConfigured ? (locale === 'vi' ? 'Điểm uy tín tổng hợp' : 'Aggregated DR / DA') : (locale === 'vi' ? 'Chưa kết nối API' : 'Requires API')}
-          </div>
-        </div>
-      </div>
+      </div>}
 
       {/* BACKLINK EXPLORER TABLE */}
       <div className="border border-white/[0.08] bg-[#0D0D0D] rounded-2xl p-6">
@@ -302,7 +281,7 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
                 <th className="pb-3 font-semibold">Anchor Text</th>
                 <th className="pb-3 font-semibold">{locale === 'vi' ? 'Loại' : 'Type'}</th>
                 <th className="pb-3 font-semibold">Follow</th>
-                <th className="pb-3 font-semibold text-right">{locale === 'vi' ? 'Độ uy tín' : 'Authority'}</th>
+                <th className="pb-3 font-semibold text-right">{locale === 'vi' ? 'Hạng do nhà cung cấp báo cáo' : 'Provider-reported rank'}</th>
                 <th className="pb-3 font-semibold text-right">{locale === 'vi' ? 'Phát hiện đầu' : 'First Seen'}</th>
               </tr>
             </thead>
@@ -312,9 +291,7 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
                   <td colSpan={6} className="py-8 text-center text-neutral-500 font-sans">
                     {isConfigured
                       ? (locale === 'vi' ? 'Không có backlink nào khớp với bộ lọc hiện tại.' : 'No backlinks matching current filters.')
-                      : (locale === 'vi'
-                        ? 'Chưa kết nối nguồn dữ liệu backlink (DataForSEO / Ahrefs / Semrush). Không hiển thị dữ liệu giả lập.'
-                        : 'Backlink provider API not connected. Zero simulated data.')}
+                      : 'Backlink data unavailable - configure a supported provider.'}
                   </td>
                 </tr>
               ) : (
@@ -342,15 +319,14 @@ export const BacklinksView: React.FC<BacklinksViewProps> = ({ currentDomain = 'h
                             : 'bg-neutral-800 text-neutral-400'
                         }`}
                       >
-                        {link.isFollow ? 'Dofollow' : 'Nofollow'}
+                        {link.isFollow === null ? 'Not reported' : link.isFollow ? 'Dofollow' : 'Nofollow'}
                       </span>
                     </td>
                     <td className="py-3 text-right">
-                      <span className="font-bold text-[#FF8A3D]">{link.domainAuthority}</span>
-                      <span className="text-neutral-500 text-[10px]">/100</span>
+                      {link.providerRank === null ? <span className="text-neutral-500">Not reported</span> : <span className="font-bold text-[#FF8A3D]">{link.providerRank}</span>}
                     </td>
                     <td className="py-3 text-right text-neutral-400">
-                      {new Date(link.firstSeen).toLocaleDateString()}
+                      {link.firstSeen ? new Date(link.firstSeen).toLocaleDateString() : 'Not reported'}
                     </td>
                   </tr>
                 ))

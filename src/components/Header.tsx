@@ -25,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAudit, onOpenAuth, onOpenA
   const navLinks = [
     { label: t('navigation.seoAudit'), href: '#features' },
     { label: t('navigation.technicalSeo'), href: '#audit-preview' },
+    { label: 'SEO Tools', href: '/seo-tools/' },
     { label: t('navigation.backlinks'), href: '#signals' },
     { label: t('navigation.keywords'), href: '#signals' },
     { label: t('navigation.domain'), href: '#dashboard' },

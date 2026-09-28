@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { Header } from './components/Header';
 import { HeroSection } from './sections/HeroSection';
 import { SocialProofSection } from './sections/SocialProofSection';
@@ -23,9 +23,17 @@ import {
   INITIAL_HEALTH_SCORE,
 } from './components/app/initialAuditState';
 import { PageAuditData, RuleEvaluationResult, OverallHealthScore } from './rules/types';
+const SeoToolsSite = lazy(() => import('./components/SeoToolsSite').then(({ SeoToolsSite: component }) => ({ default: component })));
 
 export default function App() {
-  const isRedirectCheckRoute = window.location.pathname.replace(/^\/en(?=\/|$)/u, '') === '/redirect-check';
+  const pathname = window.location.pathname;
+  const normalizedPath = pathname.replace(/^\/en(?=\/|$)/u, '') || '/';
+  if (normalizedPath === '/seo-tools' || normalizedPath.startsWith('/seo-tools/')) {
+    const seoToolsPath = normalizedPath.endsWith('/') ? normalizedPath : `${normalizedPath}/`;
+    return <Suspense fallback={<div className="min-h-screen bg-[#080808]" aria-label="Loading SEO tools" />}><SeoToolsSite pathname={seoToolsPath} /></Suspense>;
+  }
+
+  const isRedirectCheckRoute = normalizedPath === '/redirect-check';
   const [appMode, setAppMode] = useState<'marketing' | 'app'>(() => isRedirectCheckRoute ? 'app' : 'marketing');
   const [auditTargetUrl, setAuditTargetUrl] = useState<string>('https://yourwebsite.com');
   const [isAuditModalOpen, setIsAuditModalOpen] = useState<boolean>(false);

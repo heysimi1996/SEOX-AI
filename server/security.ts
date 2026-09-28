@@ -47,7 +47,7 @@ function isPrivateIPv4(ip: string): boolean {
  */
 function isPrivateIPv6(ip: string): boolean {
   if (!ip.includes(':')) return false;
-  const normalized = ip.toLowerCase();
+  const normalized = ip.toLowerCase().replace(/^\[|\]$/gu, '');
   // Loopback ::1
   if (normalized === '::1' || normalized === '0:0:0:0:0:0:0:1') return true;
   // Link-local fe80::/10

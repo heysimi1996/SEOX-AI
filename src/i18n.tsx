@@ -38,6 +38,7 @@ import enSettings from './locales/en/settings.json';
 import enReports from './locales/en/reports.json';
 import enAuth from './locales/en/auth.json';
 import enErrors from './locales/en/errors.json';
+import { canonicalUrlForPath } from './data/canonicalUrl';
 
 export type SupportedLocale = 'vi' | 'en';
 
@@ -148,10 +149,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       canonicalEl.setAttribute('rel', 'canonical');
       document.head.appendChild(canonicalEl);
     }
-    const currentOrigin = window.location.origin;
-    const currentPath = window.location.pathname.replace(/^\/en\/?/, '/');
-    const canonicalHref = locale === 'en' ? `${currentOrigin}/en${currentPath === '/' ? '' : currentPath}` : `${currentOrigin}${currentPath}`;
-    canonicalEl.setAttribute('href', canonicalHref);
+    canonicalEl.setAttribute('href', canonicalUrlForPath(window.location.pathname));
 
     // Save to localStorage & cookie for persistence
     try {
@@ -171,10 +169,11 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const search = window.location.search;
       const hash = window.location.hash;
 
-      if (newLocale === 'en' && !path.startsWith('/en')) {
+      const isSeoToolsRoute = path === '/seo-tools' || path.startsWith('/seo-tools/');
+      if (!isSeoToolsRoute && newLocale === 'en' && !path.startsWith('/en')) {
         const newPath = '/en' + (path === '/' ? '' : path);
         window.history.pushState({}, '', newPath + search + hash);
-      } else if (newLocale === 'vi' && path.startsWith('/en')) {
+      } else if (!isSeoToolsRoute && newLocale === 'vi' && path.startsWith('/en')) {
         const newPath = path.replace(/^\/en(?:\/|$)/, '/') || '/';
         window.history.pushState({}, '', newPath + search + hash);
       }

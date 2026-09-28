@@ -35,6 +35,12 @@ export interface RedirectCheckResult {
 const MAX_REDIRECT_HOPS = 10;
 const REQUEST_TIMEOUT_MS = 10000;
 
+export interface RedirectCheckDependencies {
+  validateUrl?: typeof validateSafeUrl;
+  fetch?: typeof fetch;
+  timeoutMs?: number;
+}
+
 export function normalizeRedirectInput(raw: string): URL {
   const value = raw.trim();
   if (!value) throw new Error('URL is required.');
@@ -67,6 +73,13 @@ function isRedirect(status: number): boolean {
 
 function errorCodeFor(error: unknown): RedirectErrorCode {
   if (error instanceof DOMException && error.name === 'TimeoutError') return 'TIMEOUT';
+  if (error && typeof error === 'object' && 'cause' in error) {
+    const cause = error.cause;
+    if (cause && typeof cause === 'object' && 'code' in cause) {
+      const code = cause.code;
+      if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') return 'DNS_ERROR';
+    }
+  }
   const message = error instanceof Error ? error.message.toLowerCase() : '';
   if (message.includes('not allowed') || message.includes('private') || message.includes('localhost')) return 'SSRF_BLOCKED';
   if (message.includes('ssl') || message.includes('certificate') || message.includes('tls')) return 'SSL_ERROR';
@@ -99,7 +112,14 @@ function statusResult(
   return { result: 'WARNING', message: 'URL responds, but redirect configuration needs review.' };
 }
 
-export async function checkRedirect(rawUrl: string, rawCanonicalDomain: string): Promise<RedirectCheckResult> {
+export async function checkRedirect(
+  rawUrl: string,
+  rawCanonicalDomain: string,
+  dependencies: RedirectCheckDependencies = {},
+): Promise<RedirectCheckResult> {
+  const validateUrl = dependencies.validateUrl ?? validateSafeUrl;
+  const fetchImpl = dependencies.fetch ?? fetch;
+  const timeoutMs = dependencies.timeoutMs ?? REQUEST_TIMEOUT_MS;
   let inputUrl: URL;
   let canonicalDomain: URL;
   try {
@@ -120,7 +140,7 @@ export async function checkRedirect(rawUrl: string, rawCanonicalDomain: string):
     };
   }
 
-  const safeInput = await validateSafeUrl(inputUrl.toString());
+  const safeInput = await validateUrl(inputUrl.toString());
   if (!safeInput.safe) {
     return {
       inputUrl: inputUrl.toString(),
@@ -161,14 +181,14 @@ export async function checkRedirect(rawUrl: string, rawCanonicalDomain: string):
       }
       visited.add(currentKey);
 
-      const response = await fetch(current, {
+      const response = await fetchImpl(current, {
         method: 'GET',
         redirect: 'manual',
         headers: {
           'User-Agent': 'SEOX-AI-RedirectChecker/1.0',
           Range: 'bytes=0-4095',
         },
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       finalStatus = response.status;
       const location = response.headers.get('location') || undefined;
@@ -197,7 +217,21 @@ export async function checkRedirect(rawUrl: string, rawCanonicalDomain: string):
       }
 
       const next = new URL(location, current);
-      const safeNext = await validateSafeUrl(next.toString());
+      if (next.protocol !== 'http:' && next.protocol !== 'https:') {
+        return {
+          inputUrl: inputUrl.toString(),
+          canonicalDomain: canonicalDomain.toString(),
+          status: response.status,
+          finalUrl: next.toString(),
+          redirectCount: chain.length,
+          chain,
+          responseTimeMs: Date.now() - startedAt,
+          result: 'ERROR',
+          message: 'Redirect target is not allowed.',
+          errorCode: 'SSRF_BLOCKED',
+        };
+      }
+      const safeNext = await validateUrl(next.toString());
       if (!safeNext.safe) {
         return {
           inputUrl: inputUrl.toString(),

@@ -10,11 +10,11 @@ export interface Backlink {
   targetUrl: string;
   anchor: string;
   linkType: 'text' | 'image' | 'redirect' | 'canonical' | 'frame';
-  isFollow: boolean;
-  domainAuthority: number; // 0 - 100
-  pageAuthority: number;   // 0 - 100
-  firstSeen: string;
-  lastSeen: string;
+  isFollow: boolean | null;
+  providerRank: number | null;
+  pageRank: number | null;
+  firstSeen: string | null;
+  lastSeen: string | null;
   ipAddress?: string;
   cBlock?: string;
   tld?: string;
@@ -24,13 +24,9 @@ export interface Backlink {
 export interface BacklinkMetrics {
   totalBacklinks: number;
   referringDomains: number;
-  dofollowCount: number;
-  nofollowCount: number;
-  dofollowPercentage: number;
-  newLast30Days: number;
-  lostLast30Days: number;
-  averageAuthority: number;
-  topAnchors: Array<{ anchor: string; count: number; percentage: number }>;
+  dofollowCount: number | null;
+  nofollowCount: number | null;
+  dofollowPercentage: number | null;
 }
 
 export interface BacklinkRiskIndicator {
@@ -59,9 +55,9 @@ export interface BacklinkFilterOptions {
 
 export interface BacklinkProviderResponse {
   status: 'configured' | 'not_configured';
-  metrics: BacklinkMetrics;
+  metrics: BacklinkMetrics | null;
   backlinks: Backlink[];
-  riskAssessment: BacklinkRiskAssessment;
+  riskAssessment: BacklinkRiskAssessment | null;
   provider: string;
   isLive: boolean;
   configured: boolean;
@@ -169,7 +165,7 @@ export function evaluateBacklinkRisk(backlinks: Backlink[]): BacklinkRiskAssessm
     const hasKeyword = suspiciousKeywords.some(k => text.includes(k));
     const hasRiskyTLD = riskyTLDs.some(tld => link.sourceDomain.endsWith(tld));
 
-    if (hasKeyword || (hasRiskyTLD && link.domainAuthority < 15)) {
+    if (hasKeyword || (hasRiskyTLD && link.providerRank !== null && link.providerRank < 15)) {
       suspiciousLinksCount++;
       if (suspiciousExamples.length < 2) {
         suspiciousExamples.push(link.sourceDomain);
@@ -242,19 +238,9 @@ export class DataForSeoAdapter implements BacklinkProvider {
     if (!configured) {
       return {
         status: 'not_configured',
-        metrics: {
-          totalBacklinks: 0,
-          referringDomains: 0,
-          dofollowCount: 0,
-          nofollowCount: 0,
-          dofollowPercentage: 0,
-          newLast30Days: 0,
-          lostLast30Days: 0,
-          averageAuthority: 0,
-          topAnchors: [],
-        },
+        metrics: null,
         backlinks: [],
-        riskAssessment: evaluateBacklinkRisk([]),
+        riskAssessment: null,
         provider: this.name,
         isLive: false,
         configured: false,
@@ -280,45 +266,60 @@ export class DataForSeoAdapter implements BacklinkProvider {
         ]),
       });
 
+      if (!res.ok) throw new Error(`DataForSEO returned HTTP ${res.status}.`);
       const json = await res.json();
-      const items = json?.tasks?.[0]?.result?.[0]?.items || [];
+      const items: unknown = json?.tasks?.[0]?.result?.[0]?.items;
+      if (!Array.isArray(items)) throw new Error('DataForSEO returned no backlink records.');
 
-      const backlinks: Backlink[] = items.map((item: any, i: number) => ({
-        id: `dfs_${i}_${item.url_from}`,
-        sourceDomain: item.domain_from || 'external.com',
-        sourceUrl: item.url_from || `https://${cleanDomain}`,
-        targetUrl: item.url_to || `https://${cleanDomain}`,
-        anchor: item.anchor || '',
-        linkType: item.is_image ? 'image' : 'text',
-        isFollow: item.dofollow ?? true,
-        domainAuthority: item.rank || 30,
-        pageAuthority: item.page_from_rank || 25,
-        firstSeen: item.first_seen || new Date().toISOString(),
-        lastSeen: item.last_visited || new Date().toISOString(),
-      }));
+      const numericValue = (value: unknown): number | null => (
+        typeof value === 'number' && Number.isFinite(value) ? value : null
+      );
+      const stringValue = (value: unknown): string | null => (
+        typeof value === 'string' && value.trim() ? value.trim() : null
+      );
+      const backlinks: Backlink[] = items.flatMap((rawItem: unknown, index: number) => {
+        if (!rawItem || typeof rawItem !== 'object') return [];
+        const item = rawItem as Record<string, unknown>;
+        const sourceUrl = stringValue(item.url_from);
+        const targetUrl = stringValue(item.url_to);
+        if (!sourceUrl || !targetUrl) return [];
+        let sourceDomain = stringValue(item.domain_from);
+        try {
+          sourceDomain ||= new URL(sourceUrl).hostname;
+        } catch {
+          return [];
+        }
+        return [{
+          id: `dfs_${index}_${sourceUrl}`,
+          sourceDomain,
+          sourceUrl,
+          targetUrl,
+          anchor: stringValue(item.anchor) ?? '',
+          linkType: item.is_image === true ? 'image' : 'text',
+          isFollow: typeof item.dofollow === 'boolean' ? item.dofollow : null,
+          providerRank: numericValue(item.rank),
+          pageRank: numericValue(item.page_from_rank),
+          firstSeen: stringValue(item.first_seen),
+          lastSeen: stringValue(item.last_visited),
+        }];
+      });
 
-      const dofollowCount = backlinks.filter(b => b.isFollow).length;
+      const knownFollowFlags = backlinks.filter((link) => link.isFollow !== null);
+      const dofollowCount = knownFollowFlags.filter((link) => link.isFollow === true).length;
       const refDomains = new Set(backlinks.map(b => b.sourceDomain)).size;
-
       const metrics: BacklinkMetrics = {
         totalBacklinks: backlinks.length,
         referringDomains: refDomains,
-        dofollowCount,
-        nofollowCount: backlinks.length - dofollowCount,
-        dofollowPercentage: backlinks.length ? Math.round((dofollowCount / backlinks.length) * 100) : 0,
-        newLast30Days: Math.round(backlinks.length * 0.15),
-        lostLast30Days: Math.round(backlinks.length * 0.04),
-        averageAuthority: backlinks.length
-          ? Math.round(backlinks.reduce((acc, b) => acc + b.domainAuthority, 0) / backlinks.length)
-          : 0,
-        topAnchors: [],
+        dofollowCount: knownFollowFlags.length ? dofollowCount : null,
+        nofollowCount: knownFollowFlags.length ? knownFollowFlags.length - dofollowCount : null,
+        dofollowPercentage: knownFollowFlags.length ? Math.round((dofollowCount / knownFollowFlags.length) * 100) : null,
       };
 
       return {
         status: 'configured',
         metrics,
         backlinks,
-        riskAssessment: evaluateBacklinkRisk(backlinks),
+        riskAssessment: backlinks.length ? evaluateBacklinkRisk(backlinks) : null,
         provider: this.name,
         isLive: true,
         configured: true,
@@ -326,19 +327,9 @@ export class DataForSeoAdapter implements BacklinkProvider {
     } catch {
       return {
         status: 'not_configured',
-        metrics: {
-          totalBacklinks: 0,
-          referringDomains: 0,
-          dofollowCount: 0,
-          nofollowCount: 0,
-          dofollowPercentage: 0,
-          newLast30Days: 0,
-          lostLast30Days: 0,
-          averageAuthority: 0,
-          topAnchors: [],
-        },
+        metrics: null,
         backlinks: [],
-        riskAssessment: evaluateBacklinkRisk([]),
+        riskAssessment: null,
         provider: this.name,
         isLive: false,
         configured: false,
@@ -352,29 +343,18 @@ export class AhrefsAdapter implements BacklinkProvider {
   id = 'ahrefs';
   name = 'Ahrefs';
   isConfigured(): boolean {
-    return Boolean(process.env.AHREFS_API_KEY && process.env.AHREFS_API_KEY.trim().length > 0);
+    return false;
   }
   async fetchBacklinks(domain: string, options?: BacklinkFilterOptions): Promise<BacklinkProviderResponse> {
-    const configured = this.isConfigured();
     return {
-      status: configured ? 'configured' : 'not_configured',
-      metrics: {
-        totalBacklinks: 0,
-        referringDomains: 0,
-        dofollowCount: 0,
-        nofollowCount: 0,
-        dofollowPercentage: 0,
-        newLast30Days: 0,
-        lostLast30Days: 0,
-        averageAuthority: 0,
-        topAnchors: [],
-      },
+      status: 'not_configured',
+      metrics: null,
       backlinks: [],
-      riskAssessment: evaluateBacklinkRisk([]),
+      riskAssessment: null,
       provider: this.name,
       isLive: false,
-      configured,
-      message: configured ? undefined : 'Chưa kết nối nguồn dữ liệu backlink',
+      configured: false,
+      message: 'Ahrefs backlink API integration is not implemented.',
     };
   }
 }
@@ -383,29 +363,18 @@ export class SemrushAdapter implements BacklinkProvider {
   id = 'semrush';
   name = 'Semrush';
   isConfigured(): boolean {
-    return Boolean(process.env.SEMRUSH_API_KEY && process.env.SEMRUSH_API_KEY.trim().length > 0);
+    return false;
   }
   async fetchBacklinks(domain: string, options?: BacklinkFilterOptions): Promise<BacklinkProviderResponse> {
-    const configured = this.isConfigured();
     return {
-      status: configured ? 'configured' : 'not_configured',
-      metrics: {
-        totalBacklinks: 0,
-        referringDomains: 0,
-        dofollowCount: 0,
-        nofollowCount: 0,
-        dofollowPercentage: 0,
-        newLast30Days: 0,
-        lostLast30Days: 0,
-        averageAuthority: 0,
-        topAnchors: [],
-      },
+      status: 'not_configured',
+      metrics: null,
       backlinks: [],
-      riskAssessment: evaluateBacklinkRisk([]),
+      riskAssessment: null,
       provider: this.name,
       isLive: false,
-      configured,
-      message: configured ? undefined : 'Chưa kết nối nguồn dữ liệu backlink',
+      configured: false,
+      message: 'Semrush backlink API integration is not implemented.',
     };
   }
 }
@@ -414,29 +383,18 @@ export class MozAdapter implements BacklinkProvider {
   id = 'moz';
   name = 'Moz';
   isConfigured(): boolean {
-    return Boolean(process.env.MOZ_ACCESS_ID && process.env.MOZ_SECRET_KEY);
+    return false;
   }
   async fetchBacklinks(domain: string, options?: BacklinkFilterOptions): Promise<BacklinkProviderResponse> {
-    const configured = this.isConfigured();
     return {
-      status: configured ? 'configured' : 'not_configured',
-      metrics: {
-        totalBacklinks: 0,
-        referringDomains: 0,
-        dofollowCount: 0,
-        nofollowCount: 0,
-        dofollowPercentage: 0,
-        newLast30Days: 0,
-        lostLast30Days: 0,
-        averageAuthority: 0,
-        topAnchors: [],
-      },
+      status: 'not_configured',
+      metrics: null,
       backlinks: [],
-      riskAssessment: evaluateBacklinkRisk([]),
+      riskAssessment: null,
       provider: this.name,
       isLive: false,
-      configured,
-      message: configured ? undefined : 'Chưa kết nối nguồn dữ liệu backlink',
+      configured: false,
+      message: 'Moz backlink API integration is not implemented.',
     };
   }
 }
@@ -445,29 +403,18 @@ export class MajesticAdapter implements BacklinkProvider {
   id = 'majestic';
   name = 'Majestic';
   isConfigured(): boolean {
-    return Boolean(process.env.MAJESTIC_API_KEY && process.env.MAJESTIC_API_KEY.trim().length > 0);
+    return false;
   }
   async fetchBacklinks(domain: string, options?: BacklinkFilterOptions): Promise<BacklinkProviderResponse> {
-    const configured = this.isConfigured();
     return {
-      status: configured ? 'configured' : 'not_configured',
-      metrics: {
-        totalBacklinks: 0,
-        referringDomains: 0,
-        dofollowCount: 0,
-        nofollowCount: 0,
-        dofollowPercentage: 0,
-        newLast30Days: 0,
-        lostLast30Days: 0,
-        averageAuthority: 0,
-        topAnchors: [],
-      },
+      status: 'not_configured',
+      metrics: null,
       backlinks: [],
-      riskAssessment: evaluateBacklinkRisk([]),
+      riskAssessment: null,
       provider: this.name,
       isLive: false,
-      configured,
-      message: configured ? undefined : 'Chưa kết nối nguồn dữ liệu backlink',
+      configured: false,
+      message: 'Majestic backlink API integration is not implemented.',
     };
   }
 }
@@ -481,19 +428,9 @@ export class NoneBacklinkAdapter implements BacklinkProvider {
   async fetchBacklinks(domain: string, options?: BacklinkFilterOptions): Promise<BacklinkProviderResponse> {
     return {
       status: 'not_configured',
-      metrics: {
-        totalBacklinks: 0,
-        referringDomains: 0,
-        dofollowCount: 0,
-        nofollowCount: 0,
-        dofollowPercentage: 0,
-        newLast30Days: 0,
-        lostLast30Days: 0,
-        averageAuthority: 0,
-        topAnchors: [],
-      },
+      metrics: null,
       backlinks: [],
-      riskAssessment: evaluateBacklinkRisk([]),
+      riskAssessment: null,
       provider: 'None',
       isLive: false,
       configured: false,

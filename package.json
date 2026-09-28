@@ -9,7 +9,7 @@
     "start": "tsx server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "test": "node --import tsx --test server/providers/keyword-volume/*.test.ts server/redirectChecker.test.ts",
+    "test": "node --import tsx --test server/providers/keyword-volume/*.test.ts server/providers/backlinkProvider.test.ts server/redirectChecker.test.ts server/seoMetadata.test.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
