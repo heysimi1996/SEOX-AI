@@ -34,6 +34,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </span>
             </div>
 
+            <div className="mx-auto lg:mx-0 max-w-[760px] overflow-hidden rounded-[28px] border border-[#FF7A1A]/40 bg-[#0d0d0d]/70 p-2 shadow-[0_0_30px_rgba(255,125,34,0.2)] backdrop-blur-sm">
+              <img
+                src="/logo-seox-ai.png"
+                alt="SEOX AI"
+                className="h-auto w-full max-w-full object-contain drop-shadow-[0_0_18px_rgba(255,126,2,0.35)]"
+              />
+            </div>
+
             {/* Large headline */}
             <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-[1.08] text-balance">
               {locale === 'vi' ? (

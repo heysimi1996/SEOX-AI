@@ -38,12 +38,11 @@ export const Footer: React.FC = () => {
               className="flex items-center gap-2 group tracking-tight text-white font-extrabold text-xl"
               aria-label="SEOX AI Home"
             >
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF5E00] to-[#E63900] flex items-center justify-center shadow-md shadow-[#FF5E00]/25">
-                <span className="text-white font-black text-xs tracking-tighter">S</span>
-              </div>
-              <span>
-                SEOX<span className="text-[#FF5E00] ml-1">AI</span>
-              </span>
+              <img
+                src="/logo-seox-ai.png"
+                alt="SEOX AI"
+                className="h-8 w-auto max-w-[220px] object-contain drop-shadow-[0_0_12px_rgba(255,126,2,0.5)]"
+              />
             </a>
 
             <p className="text-neutral-400 text-xs max-w-sm leading-relaxed">
