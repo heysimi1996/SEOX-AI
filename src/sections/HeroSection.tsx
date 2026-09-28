@@ -36,9 +36,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
             <div className="mx-auto lg:mx-0 max-w-[760px] overflow-hidden rounded-[28px] border border-[#FF7A1A]/40 bg-[#0d0d0d]/70 p-2 shadow-[0_0_30px_rgba(255,125,34,0.2)] backdrop-blur-sm">
               <img
-                src="/logo-seox-ai.png"
-                alt="SEOX AI"
+                src="/seox-ai-banner.png"
+                alt="SEOX AI - SEO tools, keyword volume checker and website analysis"
                 className="h-auto w-full max-w-full object-contain drop-shadow-[0_0_18px_rgba(255,126,2,0.35)]"
+                width="1983"
+                height="793"
+                fetchPriority="high"
               />
             </div>
 
