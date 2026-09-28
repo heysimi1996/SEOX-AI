@@ -24,6 +24,7 @@ import {
 } from './components/app/initialAuditState';
 import { PageAuditData, RuleEvaluationResult, OverallHealthScore } from './rules/types';
 const SeoToolsSite = lazy(() => import('./components/SeoToolsSite').then(({ SeoToolsSite: component }) => ({ default: component })));
+const EntityManager = lazy(() => import('./components/EntityManager').then(({ EntityManager: component }) => ({ default: component })));
 
 export default function App() {
   const pathname = window.location.pathname;
@@ -31,6 +32,9 @@ export default function App() {
   if (normalizedPath === '/seo-tools' || normalizedPath.startsWith('/seo-tools/')) {
     const seoToolsPath = normalizedPath.endsWith('/') ? normalizedPath : `${normalizedPath}/`;
     return <Suspense fallback={<div className="min-h-screen bg-[#080808]" aria-label="Loading SEO tools" />}><SeoToolsSite pathname={seoToolsPath} /></Suspense>;
+  }
+  if (normalizedPath === '/entity-manager') {
+    return <Suspense fallback={<div className="min-h-screen bg-[#080808]" aria-label="Loading Entity Manager" />}><EntityManager /></Suspense>;
   }
 
   const isRedirectCheckRoute = normalizedPath === '/redirect-check';

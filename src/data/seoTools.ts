@@ -1,3 +1,5 @@
+import { SITE_ORIGIN } from './siteIdentity';
+
 export interface SeoToolPage {
   slug: string;
   path: string;
@@ -18,7 +20,7 @@ export interface SeoToolPage {
 }
 
 export const SEO_TOOLS_BASE = '/seo-tools/';
-export const SEO_PRODUCTION_ORIGIN = 'https://seox-ai.site';
+export const SEO_PRODUCTION_ORIGIN = SITE_ORIGIN;
 
 export const seoToolPages: SeoToolPage[] = [
   {

@@ -161,6 +161,7 @@ function ToolsHeader() {
         <nav className="hidden items-center gap-2 md:flex">
           <a href="/" className="px-3 py-2 text-sm text-neutral-300 hover:text-white">Home</a>
           <ToolDropdown />
+          <a href="/entity-manager" className="px-3 py-2 text-sm text-neutral-300 hover:text-white">Entity Manager</a>
           <a href={`${SEO_TOOLS_BASE}seo-checker/`} className="rounded-lg bg-[#FF5E00] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#FF6A1A]">Open SEO Checker</a>
         </nav>
         <button
@@ -177,6 +178,7 @@ function ToolsHeader() {
         <nav className="border-t border-white/[0.08] bg-[#0D0D0D] px-4 py-3 md:hidden">
           <a href="/" className="flex min-h-11 items-center text-sm text-neutral-300">Home</a>
           <ToolDropdown mobile />
+          <a href="/entity-manager" className="flex min-h-11 items-center text-sm text-neutral-300 hover:text-white">Entity Manager</a>
           <a href={`${SEO_TOOLS_BASE}seo-checker/`} className="mt-2 flex min-h-11 items-center justify-center rounded-lg bg-[#FF5E00] px-4 text-sm font-bold text-white">Open SEO Checker</a>
         </nav>
       )}
@@ -654,6 +656,7 @@ function SeoToolsFooter() {
           <a href={SEO_TOOLS_BASE} className="hover:text-white">Free SEO Tools</a>
           <a href={`${SEO_TOOLS_BASE}seo-checker/`} className="hover:text-white">SEO Checker</a>
           <a href={`${SEO_TOOLS_BASE}keyword-volume/`} className="hover:text-white">Keyword Volume</a>
+          <a href="/entity-manager" className="hover:text-white">Entity Manager</a>
         </nav>
       </div>
     </footer>
@@ -735,6 +738,7 @@ export const SeoToolsSite: React.FC<{ pathname: string }> = ({ pathname }) => {
                     const related = seoToolPages.find((item) => item.slug === slug);
                     return related ? <a key={slug} href={related.path} className="flex min-h-10 items-center justify-between gap-2 rounded-lg px-2 text-sm text-neutral-300 hover:bg-white/[0.05] hover:text-white">{related.name}<ArrowRight className="h-3.5 w-3.5 text-neutral-500" /></a> : null;
                   })}
+                  {tool.slug === 'schema-checker' && <a href="/entity-manager" className="flex min-h-10 items-center justify-between gap-2 rounded-lg px-2 text-sm text-neutral-300 hover:bg-white/[0.05] hover:text-white">Entity Manager<ArrowRight className="h-3.5 w-3.5 text-neutral-500" /></a>}
                 </nav>
               </aside>
             </article>

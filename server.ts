@@ -789,6 +789,24 @@ function registerSeoToolsHtmlRoute(
   });
 }
 
+function registerEntityManagerHtmlRoute(
+  templatePath: string,
+  transformIndexHtml?: (url: string, html: string) => Promise<string>,
+) {
+  app.get(['/entity-manager', '/entity-manager/', '/en/entity-manager', '/en/entity-manager/'], async (req, res, next) => {
+    let html = fs.readFileSync(templatePath, 'utf8');
+    const rendered = renderSeoPageHtml(html, req.path);
+    if (!rendered) return res.status(404).type('text/plain').send('Entity Manager page not found');
+    html = rendered;
+    try {
+      if (transformIndexHtml) html = await transformIndexHtml(req.originalUrl, html);
+      return res.status(200).type('html').send(html);
+    } catch (error) {
+      return next(error);
+    }
+  });
+}
+
 function registerEnglishHomepageRoute(
   templatePath: string,
   transformIndexHtml?: (url: string, html: string) => Promise<string>,
@@ -824,11 +842,13 @@ async function startServer() {
     const indexPath = path.resolve(process.cwd(), 'index.html');
     registerEnglishHomepageRoute(indexPath, (url, html) => vite.transformIndexHtml(url, html));
     registerSeoToolsHtmlRoute(indexPath, (url, html) => vite.transformIndexHtml(url, html));
+    registerEntityManagerHtmlRoute(indexPath, (url, html) => vite.transformIndexHtml(url, html));
     app.use(vite.middlewares);
   } else {
     const indexPath = path.join(distPath, 'index.html');
     registerEnglishHomepageRoute(indexPath);
     registerSeoToolsHtmlRoute(indexPath);
+    registerEntityManagerHtmlRoute(indexPath);
     // Serve static files in production
     app.use(express.static(distPath));
     app.get('*', (req, res) => {

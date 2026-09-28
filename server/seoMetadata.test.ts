@@ -6,6 +6,7 @@ import { seoToolPages, SEO_PRODUCTION_ORIGIN, SEO_TOOLS_BASE } from '../src/data
 import { getSeoPageMetadata } from '../src/data/seoPageMetadata.ts';
 import { canonicalUrlForPath } from '../src/data/canonicalUrl.ts';
 import { getMetaFieldStatus, hasAuditedScore } from '../src/data/seoPageQuality.ts';
+import { ENTITY_MANAGER_PATH } from '../src/data/entityManager.ts';
 import { renderLocalizedHomepageHtml, renderSeoPageHtml } from './seoMetadata.ts';
 
 const root = process.cwd();
@@ -91,6 +92,24 @@ test('route HTML receives matching canonical, title, Open Graph and JSON-LD meta
   }
   assert.doesNotMatch(toolsComponent, /createElement\(['"]script['"]\)|data-seox-seo-tools-schema/u);
   assert.equal(renderSeoPageHtml(html, '/seo-tools/not-a-tool/'), null);
+});
+
+test('Entity Manager metadata is server-rendered once for its actual route', () => {
+  for (const route of [ENTITY_MANAGER_PATH, `/en${ENTITY_MANAGER_PATH}`]) {
+    const rendered = renderSeoPageHtml(html, route);
+    assert.ok(rendered);
+    const canonical = `${SEO_PRODUCTION_ORIGIN}${route}`;
+    assert.ok(rendered.includes('<title>Entity Manager - SEOX AI | Brand & Structured Data</title>'));
+    assert.ok(rendered.includes(`<link rel="canonical" href="${canonical}"`));
+    assert.ok(rendered.includes(`<meta property="og:url" content="${canonical}"`));
+    assert.equal([...rendered.matchAll(/<script type="application\/ld\+json">/giu)].length, 1);
+    const schemaText = rendered.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/u)?.[1];
+    assert.ok(schemaText);
+    const graph = (JSON.parse(schemaText) as { '@graph': Array<Record<string, unknown>> })['@graph'];
+    assert.deepEqual(graph.map((entity) => entity['@type']), ['WebApplication', 'BreadcrumbList']);
+    assert.ok(graph.every((entity) => typeof entity['@id'] === 'string'));
+    assert.equal(new Set(graph.map((entity) => entity['@id'])).size, graph.length);
+  }
 });
 
 test('canonical URL follows the actual locale route, not the selected interface language', () => {
