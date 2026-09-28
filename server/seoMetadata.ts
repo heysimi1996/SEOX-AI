@@ -25,7 +25,9 @@ export function renderSeoPageHtml(template: string, rawPath: string): string | n
     .replace(/<meta property="og:title" content="[^"]*"\s*\/?>/iu, `<meta property="og:title" content="${escapeHtmlAttribute(metadata.title)}" />`)
     .replace(/<meta property="og:description" content="[^"]*"\s*\/?>/iu, `<meta property="og:description" content="${description}" />`)
     .replace(/<meta property="og:url" content="[^"]*"\s*\/?>/iu, `<meta property="og:url" content="${canonical}" />`)
+    .replace(/<meta property="og:image" content="[^"]*"\s*\/?>/iu, `<meta property="og:image" content="${escapeHtmlAttribute(metadata.socialImage)}" />`)
     .replace(/<meta name="twitter:url" content="[^"]*"\s*\/?>/iu, `<meta name="twitter:url" content="${canonical}" />`)
+    .replace(/<meta name="twitter:image" content="[^"]*"\s*\/?>/iu, `<meta name="twitter:image" content="${escapeHtmlAttribute(metadata.socialImage)}" />`)
     .replace(/<link rel="canonical" href="[^"]*"\s*\/?>/iu, `<link rel="canonical" href="${canonical}" />`)
     .replace(/<html lang="[^"]*"/iu, '<html lang="en"');
 

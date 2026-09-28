@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 import { seoToolPages, SEO_PRODUCTION_ORIGIN, SEO_TOOLS_BASE } from '../src/data/seoTools.ts';
-import { getSeoPageMetadata } from '../src/data/seoPageMetadata.ts';
+import { getSeoPageMetadata, SEO_SOCIAL_IMAGE } from '../src/data/seoPageMetadata.ts';
 import { canonicalUrlForPath } from '../src/data/canonicalUrl.ts';
 import { getMetaFieldStatus, hasAuditedScore } from '../src/data/seoPageQuality.ts';
 import { ENTITY_MANAGER_PATH } from '../src/data/entityManager.ts';
@@ -20,6 +20,8 @@ test('homepage metadata uses the production canonical URL', () => {
   assert.match(html, /<link rel="canonical" href="https:\/\/seox-ai\.site\/"\s*\/>/u);
   assert.match(html, /<meta property="og:url" content="https:\/\/seox-ai\.site\/"\s*\/>/u);
   assert.match(html, /<meta name="twitter:url" content="https:\/\/seox-ai\.site\/"\s*\/>/u);
+  assert.match(html, /<meta property="og:image" content="https:\/\/seox-ai\.site\/seox-ai-banner\.png"\s*\/>/u);
+  assert.match(html, /<meta name="twitter:image" content="https:\/\/seox-ai\.site\/seox-ai-banner\.png"\s*\/>/u);
   assert.doesNotMatch(html, /https?:\/\/(?:www\.)?seox\.ai/iu);
 });
 
@@ -80,7 +82,9 @@ test('route HTML receives matching canonical, title, Open Graph and JSON-LD meta
     assert.ok(rendered.includes(`<title>${route.metaTitle}</title>`));
     assert.ok(rendered.includes(`<link rel="canonical" href="${SEO_PRODUCTION_ORIGIN}${route.path}"`));
     assert.ok(rendered.includes(`<meta property="og:url" content="${SEO_PRODUCTION_ORIGIN}${route.path}"`));
+    assert.ok(rendered.includes(`<meta property="og:image" content="${SEO_SOCIAL_IMAGE}"`));
     assert.ok(rendered.includes(`<meta name="twitter:url" content="${SEO_PRODUCTION_ORIGIN}${route.path}"`));
+    assert.ok(rendered.includes(`<meta name="twitter:image" content="${SEO_SOCIAL_IMAGE}"`));
     const schemaText = rendered.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/u)?.[1];
     assert.ok(schemaText);
     const schema = JSON.parse(schemaText) as { '@graph': Array<Record<string, unknown>> };
@@ -92,6 +96,18 @@ test('route HTML receives matching canonical, title, Open Graph and JSON-LD meta
   }
   assert.doesNotMatch(toolsComponent, /createElement\(['"]script['"]\)|data-seox-seo-tools-schema/u);
   assert.equal(renderSeoPageHtml(html, '/seo-tools/not-a-tool/'), null);
+});
+
+test('all shareable SEO routes use the same production banner thumbnail', () => {
+  const paths = [SEO_TOOLS_BASE, ...seoToolPages.map((tool) => tool.path), ENTITY_MANAGER_PATH, `/en${ENTITY_MANAGER_PATH}`];
+  for (const route of paths) {
+    const metadata = getSeoPageMetadata(route);
+    assert.ok(metadata);
+    assert.equal(metadata.socialImage, SEO_SOCIAL_IMAGE);
+    const rendered = renderSeoPageHtml(html, route);
+    assert.ok(rendered?.includes(`<meta property="og:image" content="${SEO_SOCIAL_IMAGE}"`));
+    assert.ok(rendered?.includes(`<meta name="twitter:image" content="${SEO_SOCIAL_IMAGE}"`));
+  }
 });
 
 test('Entity Manager metadata is server-rendered once for its actual route', () => {

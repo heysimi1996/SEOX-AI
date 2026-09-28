@@ -7,10 +7,13 @@ import {
 } from './seoTools';
 import { ENTITY_MANAGER_PATH } from './entityManager';
 
+export const SEO_SOCIAL_IMAGE = `${SEO_PRODUCTION_ORIGIN}/seox-ai-banner.png`;
+
 export interface SeoPageMetadata {
   title: string;
   description: string;
   canonical: string;
+  socialImage: string;
   structuredData: Record<string, unknown>;
 }
 
@@ -38,6 +41,7 @@ export function getSeoPageMetadata(rawPath: string): SeoPageMetadata | null {
       title: 'Entity Manager - SEOX AI | Brand & Structured Data',
       description: 'Manage brand identity, structured data, official profiles and SEO entity information with SEOX AI.',
       canonical,
+      socialImage: SEO_SOCIAL_IMAGE,
       structuredData: {
         '@context': 'https://schema.org',
         '@graph': [
@@ -47,6 +51,7 @@ export function getSeoPageMetadata(rawPath: string): SeoPageMetadata | null {
             url: canonical,
             name: 'Entity Manager',
             description: 'Manage brand identity, structured data, official profiles and SEO entity information with SEOX AI.',
+            image: SEO_SOCIAL_IMAGE,
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web',
             inLanguage: 'en',
@@ -72,6 +77,7 @@ export function getSeoPageMetadata(rawPath: string): SeoPageMetadata | null {
       title: 'Free SEO Tools | SEOX AI',
       description: 'Free SEO tools to analyze websites, keywords, backlinks, technical SEO and search performance.',
       canonical,
+      socialImage: SEO_SOCIAL_IMAGE,
       structuredData: {
         '@context': 'https://schema.org',
         '@graph': [
@@ -81,6 +87,7 @@ export function getSeoPageMetadata(rawPath: string): SeoPageMetadata | null {
             url: canonical,
             name: 'Free SEO Tools',
             description: 'Free tools for practical website and SEO analysis.',
+            image: SEO_SOCIAL_IMAGE,
             inLanguage: 'en',
           },
           breadcrumbSchema(),
@@ -96,6 +103,7 @@ export function getSeoPageMetadata(rawPath: string): SeoPageMetadata | null {
     title: tool.metaTitle,
     description: tool.metaDescription,
     canonical,
+    socialImage: SEO_SOCIAL_IMAGE,
     structuredData: {
       '@context': 'https://schema.org',
       '@graph': [
@@ -105,6 +113,7 @@ export function getSeoPageMetadata(rawPath: string): SeoPageMetadata | null {
           url: canonical,
           name: tool.name,
           description: tool.metaDescription,
+          image: SEO_SOCIAL_IMAGE,
           applicationCategory: 'BusinessApplication',
           operatingSystem: 'Web',
           isAccessibleForFree: true,
