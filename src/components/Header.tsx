@@ -47,15 +47,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAudit, onOpenAuth, onOpenA
           {/* Zone 1: Single text element wordmark */}
           <a
             href="/"
-            className="flex items-center gap-2 group tracking-tight text-white font-extrabold text-xl sm:text-2xl transition-opacity hover:opacity-90"
+            className="flex items-center gap-3 group tracking-tight text-white font-extrabold text-xl sm:text-2xl transition-opacity hover:opacity-90"
             aria-label="SEOX AI Home"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF5E00] to-[#E63900] flex items-center justify-center shadow-lg shadow-[#FF5E00]/25 group-hover:scale-105 transition-transform">
-              <span className="text-white font-black text-sm tracking-tighter">S</span>
-            </div>
-            <span>
-              SEOX<span className="text-[#FF5E00] ml-1">AI</span>
-            </span>
+            <img
+              src="/logo-seox-ai.png"
+              alt="SEOX AI"
+              className="h-10 w-auto max-w-[220px] object-contain drop-shadow-[0_0_18px_rgba(255,126,2,0.6)]"
+            />
           </a>
 
           {/* Zone 2: Clean text navigation links */}

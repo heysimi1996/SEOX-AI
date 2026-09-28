@@ -155,8 +155,7 @@ function ToolsHeader() {
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#080808]/95">
       <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <a href="/" className="flex shrink-0 items-center gap-2 font-extrabold tracking-tight text-white" aria-label="SEOX AI home">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FF5E00] text-sm font-black">S</span>
-          <span className="text-lg">SEOX<span className="ml-1 text-[#FF5E00]">AI</span></span>
+          <img src="/logo-seox-ai.png" alt="SEOX AI" className="h-8 w-auto max-w-[180px] object-contain drop-shadow-[0_0_12px_rgba(255,126,2,0.5)]" />
         </a>
         <nav className="hidden items-center gap-2 md:flex">
           <a href="/" className="px-3 py-2 text-sm text-neutral-300 hover:text-white">Home</a>
