@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   Search,
@@ -26,6 +26,7 @@ import {
   Bot,
   FileSearch,
   BarChart3,
+  ExternalLink,
 } from 'lucide-react';
 import { PageAuditData, RuleEvaluationResult, OverallHealthScore } from '../../rules/types';
 import { OverviewView } from './views/OverviewView';
@@ -42,6 +43,7 @@ import { ReportsView } from './views/ReportsView';
 import { GscView } from './views/GscView';
 import { RankingsView } from './views/RankingsView';
 import { KeywordVolumeView } from './views/KeywordVolumeView';
+import { RedirectCheckView } from './views/RedirectCheckView';
 import { BacklinksView } from './views/BacklinksView';
 import { CompetitorsView } from './views/CompetitorsView';
 import { AiSearchSignalsView } from './views/AiSearchSignalsView';
@@ -52,6 +54,7 @@ import { LanguageSwitcher } from '../LanguageSwitcher';
 
 interface AppLayoutProps {
   onBackToMarketing: () => void;
+  initialView?: string;
   initialTargetUrl?: string;
   initialPageData: PageAuditData;
   initialEvaluations: RuleEvaluationResult[];
@@ -60,13 +63,14 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
   onBackToMarketing,
+  initialView = 'overview',
   initialTargetUrl,
   initialPageData,
   initialEvaluations,
   initialHealthScore,
 }) => {
   const { t, locale } = useI18n();
-  const [currentView, setCurrentView] = useState<string>('overview');
+  const [currentView, setCurrentView] = useState<string>(initialView);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -74,6 +78,25 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   const [pageData, setPageData] = useState<PageAuditData>(initialPageData);
   const [evaluations, setEvaluations] = useState<RuleEvaluationResult[]>(initialEvaluations);
   const [healthScore, setHealthScore] = useState<OverallHealthScore>(initialHealthScore);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const isRedirectCheckRoute = window.location.pathname.replace(/^\/en(?=\/|$)/u, '') === '/redirect-check';
+      setCurrentView(isRedirectCheckRoute ? 'redirect-check' : 'overview');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const isRedirectCheckRoute = window.location.pathname.replace(/^\/en(?=\/|$)/u, '') === '/redirect-check';
+    if (currentView === 'redirect-check' && !isRedirectCheckRoute) {
+      const localePrefix = locale === 'en' ? '/en' : '';
+      window.history.pushState({}, '', `${localePrefix}/redirect-check`);
+    } else if (currentView !== 'redirect-check' && isRedirectCheckRoute) {
+      window.history.replaceState({}, '', locale === 'en' ? '/en' : '/');
+    }
+  }, [currentView, locale]);
 
   // Selected page for /pages/[id] drill-down
   const [selectedPageForDrilldown, setSelectedPageForDrilldown] = useState<any | null>(null);
@@ -140,6 +163,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         { id: 'gsc', label: t('navigation.gsc'), icon: FileSearch },
         { id: 'rankings', label: t('navigation.keywordTracking'), icon: TrendingUp },
         { id: 'keyword-volume', label: 'Keyword Volume', icon: BarChart3 },
+        { id: 'redirect-check', label: 'Check Redirect 301', icon: ExternalLink },
       ],
     },
     {
@@ -391,6 +415,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
             {currentView === 'keyword-volume' && (
               <KeywordVolumeView />
+            )}
+
+            {currentView === 'redirect-check' && (
+              <RedirectCheckView />
             )}
 
             {currentView === 'backlinks' && (

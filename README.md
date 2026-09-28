@@ -41,3 +41,9 @@ API endpoints:
 - `GET /api/keywords/volume/history?keyword=...`
 
 Use `GET /api/integrations/status` to see which providers are configured. `npm test` runs the keyword-volume service and normalization tests; `npm run lint` performs the TypeScript check.
+
+### Check Redirect 301
+
+Open **Check Redirect 301** from **Search & Rankings** to verify a URL's redirect status, destination, redirect chain, response timing, and canonical-domain match. The server follows redirects manually (maximum 10 hops), blocks private/internal destinations, and never exposes outbound request credentials to the browser.
+
+The checker accepts domains with or without `http://` or `https://`. It uses `POST /api/redirect-check` with `url` and `canonicalDomain`; checks are rate-limited to 10 requests per client per minute.

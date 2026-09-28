@@ -25,7 +25,8 @@ import {
 import { PageAuditData, RuleEvaluationResult, OverallHealthScore } from './rules/types';
 
 export default function App() {
-  const [appMode, setAppMode] = useState<'marketing' | 'app'>('marketing');
+  const isRedirectCheckRoute = window.location.pathname.replace(/^\/en(?=\/|$)/u, '') === '/redirect-check';
+  const [appMode, setAppMode] = useState<'marketing' | 'app'>(() => isRedirectCheckRoute ? 'app' : 'marketing');
   const [auditTargetUrl, setAuditTargetUrl] = useState<string>('https://yourwebsite.com');
   const [isAuditModalOpen, setIsAuditModalOpen] = useState<boolean>(false);
   const [authModalState, setAuthModalState] = useState<{
@@ -65,7 +66,12 @@ export default function App() {
   if (appMode === 'app') {
     return (
       <AppLayout
-        onBackToMarketing={() => setAppMode('marketing')}
+        onBackToMarketing={() => {
+          const homePath = window.location.pathname.startsWith('/en') ? '/en' : '/';
+          window.history.pushState({}, '', homePath);
+          setAppMode('marketing');
+        }}
+        initialView={isRedirectCheckRoute ? 'redirect-check' : undefined}
         initialTargetUrl={auditTargetUrl}
         initialPageData={activePageData}
         initialEvaluations={activeEvaluations}

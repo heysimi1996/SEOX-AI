@@ -28,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAudit, onOpenAuth, onOpenA
     { label: t('navigation.backlinks'), href: '#signals' },
     { label: t('navigation.keywords'), href: '#signals' },
     { label: t('navigation.domain'), href: '#dashboard' },
+    { label: 'Check Redirect 301', href: '/redirect-check' },
     { label: t('navigation.aiCopilot'), href: '#copilot' },
   ];
 
@@ -56,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAudit, onOpenAuth, onOpenA
           </a>
 
           {/* Zone 2: Clean text navigation links */}
-          <nav className="hidden lg:flex items-center gap-7 text-[13px] font-medium text-neutral-300">
+          <nav className="hidden xl:flex items-center gap-5 text-xs font-medium text-neutral-300">
             {navLinks.map((link) => (
               <a
                 key={link.label}
@@ -97,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAudit, onOpenAuth, onOpenA
           </div>
 
           {/* Mobile hamburger button & Compact Language Switcher */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="xl:hidden flex items-center gap-2">
             <LanguageSwitcher isMobileCompact />
             <button
               onClick={() => onOpenAudit()}
@@ -109,6 +110,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAudit, onOpenAuth, onOpenA
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-neutral-400 hover:text-white rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5E00]"
               aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -118,14 +120,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAudit, onOpenAuth, onOpenA
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#0D0D0D] border-b border-white/[0.08] px-5 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
-          <nav className="flex flex-col space-y-3">
+        <div className="xl:hidden bg-[#0D0D0D] border-b border-white/[0.08] px-5 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
+          <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-medium text-neutral-300 hover:text-[#FF5E00] transition-colors py-1.5"
+                className="text-sm font-medium text-neutral-300 hover:text-[#FF5E00] transition-colors py-2.5"
               >
                 {link.label}
               </a>

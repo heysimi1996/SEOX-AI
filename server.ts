@@ -18,6 +18,7 @@ import { activePageSpeedProvider } from './server/providers/pageSpeedProvider.ts
 import { activeGscProvider } from './server/providers/gscProvider.ts';
 import { keywordVolumeProviders } from './server/providers/keyword-volume/index.ts';
 import { keywordVolumeRouter } from './server/routes/keywordVolumeRoutes.ts';
+import { redirectCheckRouter } from './server/routes/redirectCheckRoutes.ts';
 
 dotenv.config();
 
@@ -519,6 +520,7 @@ app.use('/api/gsc', gscRouter);
 // -------------------------------------------------------------
 app.use('/api/competitors', competitorsRouter);
 app.use('/api/keywords', keywordVolumeRouter);
+app.use('/api', redirectCheckRouter);
 
 // -------------------------------------------------------------
 // 8. SERP KEYWORD TRACKING API
